@@ -1,4 +1,4 @@
-const plugins = require('./config/plugins');
+const plugins = require('./plugins');
 
 module.exports = (eleventyConfig) => {
   // custom watch targets

@@ -3,13 +3,21 @@
   "version": "1.0.0",
   "main": "eleventy.config.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run dev -s",
+    "dev": "eleventy --serve",
+    "build": "cross-env NODE_ENV=production eleventy"
   },
   "keywords": [],
   "author": "Lea Rosema",
   "license": "MIT",
   "description": "",
   "devDependencies": {
-    "@11ty/eleventy": "^2.0.1"
+    "@11ty/eleventy": "^2.0.1",
+    "browserslist": "^4.21.9",
+    "dayjs": "^1.11.9",
+    "esbuild": "^0.18.17",
+    "html-minifier-terser": "^7.2.0",
+    "lightningcss": "^1.21.5",
+    "linkedom": "^0.15.1"
   }
 }

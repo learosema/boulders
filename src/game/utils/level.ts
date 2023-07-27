@@ -1,6 +1,16 @@
+export enum Field {
+  EMPTY = 0,
+  WALL = 1,
+  STONE = 2,
+  GEM = 3,
+  EXIT = 4,
+  GHOST = 5,
+  PLAYER = 6,
+};
+
 export class Level {
     
-  constructor(public level: number[][] = []) {}
+  constructor(public level: Field[][] = []) {}
 
   static parse(data: string): Level {
     const symbols = ' #.o$XGP';

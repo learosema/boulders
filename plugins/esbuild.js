@@ -5,9 +5,9 @@ const esbuild = require('esbuild');
 const path = require('path');
 
 module.exports = (eleventyConfig) => {
-  eleventyConfig.addTemplateFormats('js');
+  eleventyConfig.addTemplateFormats('ts');
 
-  eleventyConfig.addExtension('js', {
+  eleventyConfig.addExtension('ts', {
     outputFileExtension: 'js',
     compile: async (content, fullPath) => {
       if (path.basename(fullPath) !== 'game.ts') {
