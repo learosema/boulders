@@ -1,2 +1,11 @@
 @import 'config/_reset.css';
+@import 'config/_vars.css';
+@import 'config/_global.css';
+
 @import 'components/_boulders-game.css';
+@import 'components/_game-menu.css';
+@import 'components/_burger.css';
+@import 'components/_button.css';
+
+@import 'utils/_v-hidden.css';
+@import 'utils/_flow.css';

@@ -1,0 +1,10 @@
+.burger {
+  padding: 16px;
+  color: var(--fg);
+
+  > svg {
+    display: block;
+    height: 32px;
+    width: 32px;
+  }
+}

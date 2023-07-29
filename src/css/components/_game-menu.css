@@ -1,0 +1,23 @@
+.game-menu {
+  padding: 32px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 2px solid var(--fg);
+  
+  > * {
+    text-align: center;
+  }
+
+  &:not([open]) {
+    display: none;
+  }
+
+  &::backdrop {
+    backdrop-filter: blur(4px);
+  }
+}
+

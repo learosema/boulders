@@ -1,12 +1,25 @@
 boulders-game {
   display: block;
+  position: relative;
+
   width: 100vw;
   height: 100vh;
-}
+  
+  > *:not(script) {
+    position: absolute;
+  }
+  
+  > canvas {
+    display: block;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+  }
 
-boulders-game canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #f0f;
+  > button {
+    top: 16px;
+    right: 16px;
+  }
 }

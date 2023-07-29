@@ -1,10 +1,11 @@
 import { NoOpRenderer, Renderer } from "./interfaces/renderer";
+import { Level } from "./utils/level";
 
 export class BouldersGame extends HTMLElement {
 
   canvas: HTMLCanvasElement | null = null;
-  shadowRoot: ShadowRoot | null = null;
   renderer: Renderer | null = null;
+  level: Level | null = null;
   timer = NaN;
   initialized = false;
 
@@ -20,6 +21,7 @@ export class BouldersGame extends HTMLElement {
     if (! this.renderer) {
       this.setup();
     }
+    console.log('connected');
     requestAnimationFrame(this.gameLoop);
   }
 

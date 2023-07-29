@@ -1,0 +1,22 @@
+:root {
+  --bg: #000;
+  --fg: #fff;
+
+  --rose-1: #fff7f9;
+  --rose-2: #ffdce5;
+  --rose-3: #ff3b8d;
+  --rose-4: #db0072;
+  --rose-5: #800040;
+  --rose-6: #4c0023;
+
+  --blue-1: #f0f4ff;
+  --blue-2: #d4e0ff;
+  --blue-3: #0089fc;
+  --blue-4: #006dca;
+  --blue-5: #00386d;
+  --blue-6: #001a39;
+
+  --button-bg: var(--rose-4);
+  --button-bg--active: var(--rose-5);
+  --button-fg: var(--fg);
+}

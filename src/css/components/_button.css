@@ -1,0 +1,14 @@
+.button {
+  display: block;
+  text-align: center;
+  background: var(--button-bg);
+  color: var(--button-fg);
+  text-decoration: none;
+  padding: .5em 1em;
+  width: 100%;
+  user-select: none;
+
+  &:active {
+    background: var(--button-bg--active);
+  }
+}
