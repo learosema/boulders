@@ -10,8 +10,11 @@ module.exports = (eleventyConfig) => {
   eleventyConfig.addExtension('ts', {
     outputFileExtension: 'js',
     compile: async (content, fullPath) => {
-      if (path.basename(fullPath) !== 'game.ts') {
-        console.error('will not be processed: ', fullPath, path.parse(fullPath).name);
+      const parsedPath = path.parse(fullPath);
+      const basedir = path.basename(parsedPath.dir);
+
+      if (path.basename(fullPath) !== `${basedir}.ts`) {
+        console.error('will not be processed: ', fullPath);
         return;
       }
 
