@@ -25,6 +25,10 @@ export class BouldersGame extends HTMLElement {
     requestAnimationFrame(this.gameLoop);
   }
 
+  private initializeLevel() {
+    this.level = Level.parse(this.querySelector('script')?.textContent || '');
+  }
+
   disconnectedCallback() {
     this.dispose();
   }
@@ -33,6 +37,7 @@ export class BouldersGame extends HTMLElement {
     const renderer = new NoOpRenderer();
     await renderer.setup();
     this.renderer = renderer;
+    this.initializeLevel();
   }
 
   dispose() {

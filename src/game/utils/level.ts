@@ -8,20 +8,44 @@ export enum Field {
   PLAYER = 6,
 };
 
+export type Position = {
+  x: number;
+  y: number;
+}
+
 export class Level {
-    
-  constructor(public level: Field[][] = []) {}
+
+  constructor(
+    public level: Field[][] = [],
+    public playerPosition: Position|null,
+  ) {}
 
   static parse(data: string): Level {
     const symbols = ' #.o$XGP';
+    let position = null;
+    const map = data.replace(/\/\/.\n/g, '')
+      .trim()
+      .split(/[\n,]/)
+      .map((row, rowIndex) => row.split('').map((col, colIndex) => {
+        const thing = symbols.indexOf(col);
+        if (thing === Field.PLAYER) {
+          position = {
+            x: colIndex,
+            y: rowIndex
+          };
+          return Field.EMPTY;
+        }
+        return thing;
+      })
+    );
+
+
     return new Level(
-      data.replace(/\/\/.\n/g, '')
-        .trim()
-        .split(/[\n,]/)
-        .map((row) => row.split('').map((col) => symbols.indexOf(col)))
-    ); 
+      map,
+      position
+    );
   }
-  
+
   getField(x: number, y: number) {
     const { level } = this;
     const yMax = level.length - 1;
