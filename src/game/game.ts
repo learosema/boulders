@@ -1,4 +1,5 @@
 import { NoOpRenderer, Renderer } from "./interfaces/renderer";
+import { CanvasRenderer } from "./renderer/canvas-renderer";
 import { Level } from "./utils/level";
 
 export class BouldersGame extends HTMLElement {
@@ -17,26 +18,38 @@ export class BouldersGame extends HTMLElement {
     customElements.define('boulders-game', BouldersGame);
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     if (! this.renderer) {
-      this.setup();
+      this.createRenderer();
+      await this.setup();
     }
     console.log('connected');
     requestAnimationFrame(this.gameLoop);
-  }
-
-  private initializeLevel() {
-    this.level = Level.parse(this.querySelector('script')?.textContent || '');
   }
 
   disconnectedCallback() {
     this.dispose();
   }
 
+  private initializeLevel() {
+    this.level = Level.parse(this.querySelector('script')?.textContent || '');
+  }
+
+  private createRenderer()  {
+    if (this.canvas) {
+      this.canvas.remove();
+      this.canvas = null;
+    }
+    this.canvas = document.createElement('canvas');
+    this.appendChild(this.canvas);
+    this.renderer = new CanvasRenderer(this.canvas);
+  }
+
   async setup() {
-    const renderer = new NoOpRenderer();
-    await renderer.setup();
-    this.renderer = renderer;
+    if (! this.renderer) {
+      throw new Error('Renderer needs to be initialized.');
+    }
+    await this.renderer.setup();
     this.initializeLevel();
   }
 
@@ -46,6 +59,10 @@ export class BouldersGame extends HTMLElement {
   }
 
   gameLoop = () => {
+    if (this.level) {
+      this.renderer?.frame(this.level, {x:0, y:0})
+    }
+
     requestAnimationFrame(this.gameLoop);
   }
 }

@@ -3,7 +3,7 @@ import { Disposable } from "./disposable";
 
 export interface Renderer extends Disposable {
   setup(): Promise<void>;
-  frame(level: Level, playerPosition: Position, offset: Position): void;
+  frame(level: Level, offset: Position): void;
 }
 
 export class NoOpRenderer implements Renderer {

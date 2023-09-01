@@ -73,7 +73,7 @@ export class CanvasRenderer implements Renderer {
 
     for (let y = 0; y < this.dimensions.tileSize; y++) {
       for (let x = 0; x < this.dimensions.tileSize; x++) {
-        const field = level.getField()
+        // const field = level.getField()
 
 
         this.context.drawImage(this.sprites, offset.x + x * tileSize, offset.y + y * tileSize)
