@@ -36,6 +36,10 @@ export class CanvasRenderer implements Renderer {
    */
   async setup(): Promise<void> {
     this.context = this.canvas.getContext('2d');
+    if (! this.context) {
+      throw new Error('Context failed to initialize');
+    }
+    this.context.imageSmoothingEnabled = true;
     this.onResize();
     window.addEventListener('resize', this.onResize, false);
 
@@ -88,10 +92,9 @@ export class CanvasRenderer implements Renderer {
           this.context.fillStyle = '#000';
           this.context.fillRect(dx, dy, tileSize, tileSize)
         } else {
-          const sx = field * spriteSize;
-          this.context.drawImage(this.sprites, sx, 0 , spriteSize, spriteSize, dx, dy, tileSize, tileSize);
+          const sx = (field - 1) * spriteSize;
+          this.context.drawImage(this.sprites, sx, 0 , spriteSize, spriteSize, dx, dy, (tileSize + 2) * pixelRatio, (tileSize + 2) * pixelRatio);
         }
-
       }
     }
   }
