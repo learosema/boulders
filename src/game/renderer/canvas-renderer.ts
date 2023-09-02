@@ -59,10 +59,18 @@ export class CanvasRenderer implements Renderer {
 
     // number of tiles that fit into the screen
     const { width, height, tileSize } = this.dimensions;
-    // TODO: get divisions right, as soon as I get to remove all this
-    // brainfog due to toxic relationship
-    const dimX = width / tileSize;
-    const dimY = height / tileSize;
+    const dimX = Math.floor(width / tileSize);
+    const dimY = Math.floor(height / tileSize);
+
+    /*
+
+    ........
+    ........
+    ........
+    ........
+    ........
+
+    */
 
     const { playerPosition } = level;
 
