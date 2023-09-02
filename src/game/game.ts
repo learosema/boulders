@@ -1,6 +1,7 @@
 import { NoOpRenderer, Renderer } from "./interfaces/renderer";
 import { CanvasRenderer } from "./renderer/canvas-renderer";
 import { Level } from "./utils/level";
+import { loadImage } from "./utils/load-image";
 
 export class BouldersGame extends HTMLElement {
 
@@ -9,6 +10,7 @@ export class BouldersGame extends HTMLElement {
   level: Level | null = null;
   timer = NaN;
   initialized = false;
+  sprites: HTMLImageElement|null = null;
 
   constructor() {
     super();
@@ -19,6 +21,9 @@ export class BouldersGame extends HTMLElement {
   }
 
   async connectedCallback() {
+    if (! this.sprites) {
+      this.sprites = await loadImage('/gfx/sprites.png');
+    }
     if (! this.renderer) {
       this.createRenderer();
       await this.setup();
@@ -35,14 +40,17 @@ export class BouldersGame extends HTMLElement {
     this.level = Level.parse(this.querySelector('script')?.textContent || '');
   }
 
-  private createRenderer()  {
+  private async createRenderer()  {
+    if (! this.sprites) {
+      throw new Error('sprites not loaded.');
+    }
     if (this.canvas) {
       this.canvas.remove();
       this.canvas = null;
     }
     this.canvas = document.createElement('canvas');
     this.appendChild(this.canvas);
-    this.renderer = new CanvasRenderer(this.canvas);
+    this.renderer = new CanvasRenderer(this.canvas, this.sprites);
   }
 
   async setup() {

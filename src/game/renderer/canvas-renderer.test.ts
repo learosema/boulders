@@ -1,30 +1,32 @@
-import { beforeEach, describe, it } from 'node:test';
-import assert from 'node:assert/strict';
 import { CanvasRenderer } from './canvas-renderer';
-import { parseHTML } from 'linkedom';
+import { CanvasRenderingContext2D } from 'canvas';
 
 describe('Canvas Renderer', () => {
-  let window, document: Document;
+  let canvas: HTMLCanvasElement, sprites: HTMLImageElement;
 
   beforeEach(() => {
-    const DOM = parseHTML(`
-      <!doctype html>
-      <html lang="en">
-        <head>
-          <title>Test environment</title>
-        </head>
-        <body>
-        </body>
-      </html>
-    `);
 
-    window = DOM.window;
-    document = DOM.document;
-  })
+    global.Image = window.Image;
+    sprites = new Image(8 * 16, 16);
+    sprites.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+
+    canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
+  });
 
   it('should instantiate', () => {
-    const canvas = document.createElement('canvas');
-    document.body.appendChild(canvas);
-    assert.equal(!!(new CanvasRenderer(canvas)), true);
+    expect(new CanvasRenderer(canvas, sprites)).toBeTruthy();
   });
+
+  it('should setup the 2D rendering context', async () => {
+    const renderer = new CanvasRenderer(canvas, sprites);
+    await renderer.setup();
+    expect(renderer.context).toBeTruthy();
+    expect(renderer.context).toBeInstanceOf(CanvasRenderingContext2D);
+  });
+
+  it('should render a level', () => {
+
+  });
+
 });

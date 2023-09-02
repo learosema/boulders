@@ -5,51 +5,57 @@ import { pixelRatio } from "../utils/pixel-ratio";
 
 export class CanvasRenderer implements Renderer {
 
-  sprites: HTMLImageElement|null = null;
-
   /**
    * tiles on the spritesheet are 16x16 pixels
    */
-  spriteSize = 16;
+  get spriteSize() {
+    return this.sprites.height;
+  };
 
   context: CanvasRenderingContext2D|null = null;
 
   /**
    * dimensions of the screen and zoom factor of the tiles.
    */
-  dimensions = {width: 0, height: 0, tileSize: 64};
+  dimensions = {width: 0, height: 0};
 
   /**
    * current pixel ratio
    */
   pixelRatio = 1;
 
+  tileSize = 64;
+
   constructor(
-    public canvas: HTMLCanvasElement
+    public canvas: HTMLCanvasElement,
+    public sprites: HTMLImageElement,
   ) {}
 
-
+  /**
+   * sets up canvas and rendering context
+   */
   async setup(): Promise<void> {
-    this.sprites = await loadImage('/gfx/sprites.png');
     this.context = this.canvas.getContext('2d');
-    this.#setDimensions();
+    this.onResize();
+    window.addEventListener('resize', this.onResize, false);
+
   }
 
-  #setDimensions() {
+  onResize = () => {
     this.pixelRatio = pixelRatio();
-    Object.assign(this.dimensions, {
+    this.dimensions = {
       width: this.canvas.clientWidth * this.pixelRatio,
-      height: this.canvas.clientHeight * this.pixelRatio
-    });
+      height: this.canvas.clientHeight * this.pixelRatio,
+    };
+    Object.assign(this.canvas, this.dimensions);
   }
 
   /**
-   * Render the level
+   * Render the level onto canvas
    * @param level level instance
    * @param offset pixel offset to draw at.
    */
   frame(level: Level, offset: Position): void {
-
     if (! this.context) {
       throw new Error('context not initialized.');
     }
@@ -58,19 +64,13 @@ export class CanvasRenderer implements Renderer {
     }
 
     // number of tiles that fit into the screen
-    const { width, height, tileSize } = this.dimensions;
-    const dimX = Math.floor(width / tileSize);
-    const dimY = Math.floor(height / tileSize);
+    const { width, height } = this.dimensions;
+    const { tileSize, pixelRatio, spriteSize } = this;
+    const dimX = Math.floor(width / tileSize) + 1;
+    const dimY = Math.floor(height / tileSize) + 1;
 
-    /*
-
-    ........
-    ........
-    ........
-    ........
-    ........
-
-    */
+    offset.x = -Math.floor(tileSize / 2);
+    offset.y = -Math.floor(tileSize / 2);
 
     const { playerPosition } = level;
 
@@ -79,17 +79,24 @@ export class CanvasRenderer implements Renderer {
       y: Math.floor((playerPosition?.y || 0) - dimY / 2)
     }
 
-    for (let y = 0; y < this.dimensions.tileSize; y++) {
-      for (let x = 0; x < this.dimensions.tileSize; x++) {
-        // const field = level.getField()
+    for (let y = 0; y < dimY; y++) {
+      for (let x = 0; x < dimX; x++) {
+        const field = level.getField(x, y);
+        const dx = offset.x * pixelRatio + x * tileSize * pixelRatio;
+        const dy = offset.y * pixelRatio + y * tileSize * pixelRatio;
+        if (field === 0) {
+          this.context.fillStyle = '#000';
+          this.context.fillRect(dx, dy, tileSize, tileSize)
+        } else {
+          const sx = field * spriteSize;
+          this.context.drawImage(this.sprites, sx, 0 , spriteSize, spriteSize, dx, dy, tileSize, tileSize);
+        }
 
-
-        this.context.drawImage(this.sprites, offset.x + x * tileSize, offset.y + y * tileSize)
       }
     }
   }
 
   dispose(): void | Promise<void> {
-    throw new Error("Method not implemented.");
+    window.removeEventListener('resize', this.onResize, false);
   }
 }

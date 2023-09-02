@@ -10,10 +10,8 @@ module.exports = (eleventyConfig) => {
   eleventyConfig.addShortcode('year', () => `${new Date().getFullYear()}`); // current year, stephanie eckles
 
   // passthrough copy
-  // same path
-  ['src/assets/fonts/', 'src/assets/images/'].forEach((path) =>
-    eleventyConfig.addPassthroughCopy(path)
-  );
+
+  eleventyConfig.addPassthroughCopy('src/gfx');
 
   // social icons to root directory
   eleventyConfig.addPassthroughCopy({
