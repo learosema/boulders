@@ -39,7 +39,7 @@ export class CanvasRenderer implements Renderer {
     if (! this.context) {
       throw new Error('Context failed to initialize');
     }
-    this.context.imageSmoothingEnabled = true;
+
     this.onResize();
     window.addEventListener('resize', this.onResize, false);
 
@@ -79,8 +79,8 @@ export class CanvasRenderer implements Renderer {
     const { playerPosition } = level;
 
     const levelPosition = {
-      x:Math.floor((playerPosition?.x || 0) - dimX / 2),
-      y: Math.floor((playerPosition?.y || 0) - dimY / 2)
+      x:Math.floor((playerPosition?.x || 0) - tileSize / 2),
+      y: Math.floor((playerPosition?.y || 0) - tileSize / 2)
     }
 
     for (let y = 0; y < dimY; y++) {
@@ -90,10 +90,11 @@ export class CanvasRenderer implements Renderer {
         const dy = offset.y * pixelRatio + y * tileSize * pixelRatio;
         if (field === 0) {
           this.context.fillStyle = '#000';
-          this.context.fillRect(dx, dy, tileSize, tileSize)
+          this.context.fillRect(dx, dy, tileSize * pixelRatio, tileSize * pixelRatio)
         } else {
           const sx = (field - 1) * spriteSize;
-          this.context.drawImage(this.sprites, sx, 0 , spriteSize, spriteSize, dx, dy, (tileSize + 2) * pixelRatio, (tileSize + 2) * pixelRatio);
+          this.context.imageSmoothingEnabled = false;
+          this.context.drawImage(this.sprites, sx, 0 , spriteSize, spriteSize, dx, dy, (tileSize) * pixelRatio, (tileSize) * pixelRatio);
         }
       }
     }
