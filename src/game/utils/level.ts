@@ -1,4 +1,4 @@
-type LevelCallbackFunction = (eventName: string, payload?: any) => {};
+export type LevelCallbackFunction = (eventName: string, payload?: any) => void;
 
 export enum Field {
   EMPTY = 0,

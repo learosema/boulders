@@ -1,7 +1,8 @@
+import { FreqMod } from "./audio/FreqMod";
 import { IRenderer } from "./interfaces/irenderer";
 import { CanvasRenderer } from "./renderer/canvas-renderer";
 import { AnimationLoop } from "./utils/animation-interval";
-import { Level } from "./utils/level";
+import { Level, LevelCallbackFunction } from "./utils/level";
 import { loadImage } from "./utils/load-image";
 import { throttle } from "./utils/throttle";
 
@@ -15,6 +16,8 @@ export class BouldersGame extends HTMLElement {
   sprites: HTMLImageElement|null = null;
   animationLoop: AnimationLoop|null = null;
   inputQueue: string[] = [];
+  audioContext = new AudioContext();
+  mainGain = this.audioContext.createGain();
 
   constructor() {
     super();
@@ -66,6 +69,9 @@ export class BouldersGame extends HTMLElement {
   }
 
   private async setup() {
+    this.audioContext.resume();
+    this.mainGain.gain.value = .2;
+    this.mainGain.connect(this.audioContext.destination);
     if (! this.sprites) {
       this.sprites = await loadImage('/gfx/sprites.png');
     }
@@ -83,6 +89,7 @@ export class BouldersGame extends HTMLElement {
       this.animationLoop = new AnimationLoop();
       this.animationLoop.add(this.renderLoop, 1000 / 25);
       this.animationLoop.add(this.inputLoop, 50);
+      this.level.subscribe(this.onGameEvent)
     }
     this.initialized = true;
     if (! this.canvas) {
@@ -94,7 +101,18 @@ export class BouldersGame extends HTMLElement {
     this.canvas.addEventListener('keydown', this.onKeyDown, false);
   }
 
+  onGameEvent: LevelCallbackFunction = (eventName: string) => {
+    if (eventName === 'gem') {
+      const FM = new FreqMod(this.audioContext, this.mainGain, 12, 4);
+      FM.play('C6', this.audioContext.currentTime, this.audioContext.currentTime + .25);
+      setTimeout(() => FM.dispose(), 500);
+    }
+  }
+
   onKeyDown = (e: KeyboardEvent) => {
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
     if (e.code === 'ArrowUp' || e.code === 'KeyA') {
       this.inputQueue.push('up');
     }
