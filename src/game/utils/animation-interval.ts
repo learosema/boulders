@@ -1,3 +1,5 @@
+import { IDisposable } from "../interfaces/idisposable";
+
 export interface AnimationInterval {
   callback: FrameRequestCallback;
   timeout: number;
@@ -5,7 +7,8 @@ export interface AnimationInterval {
   calls: number;
 }
 
-export class AnimationLoop {
+export class AnimationLoop implements IDisposable {
+
   lastTimestamp = 0;
   timer = NaN;
 
@@ -51,4 +54,10 @@ export class AnimationLoop {
     this.lastTimestamp = t;
     this.timer = requestAnimationFrame(this.loop);
   }
+
+  dispose(): void | Promise<void> {
+    this.intervals.splice(0, this.intervals.length);
+    this.stop();
+  }
+
 }

@@ -1,7 +1,7 @@
 .burger {
   padding: 16px;
   color: var(--fg);
-
+  z-index: 10;
   > svg {
     display: block;
     height: 32px;

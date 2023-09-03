@@ -1,12 +1,19 @@
 export enum Field {
   EMPTY = 0,
   WALL = 1,
-  STONE = 2,
-  GEM = 3,
-  EXIT = 4,
-  GHOST = 5,
-  PLAYER = 6,
+  SAND = 2,
+  STONE = 3,
+  GEM = 4,
+  EXIT = 5,
+  GHOST = 6,
+  PLAYER = 7,
+  PLAYER_LEFT = 8,
 };
+
+export enum Direction {
+  LEFT = 1,
+  RIGHT = 0,
+}
 
 export type Position = {
   x: number;
@@ -19,6 +26,10 @@ export class Level {
     public level: Field[][] = [],
     public playerPosition: Position|null,
   ) {}
+
+  playerDirection = Direction.RIGHT;
+
+  playerAlive = true;
 
   static parse(data: string): Level {
     const symbols = ' #.o$XGP';
