@@ -3,7 +3,7 @@ module.exports = function (eleventyConfig) {
   // Alternatively, add this to the list of formats you pass to the `--formats` CLI argument
   eleventyConfig.addTemplateFormats("txt");
 
-  // "clowd" here means that the extension will apply to any .clowd file
+  // "txt" here means that the extension will apply to any .txt file
   eleventyConfig.addExtension("txt", {
     compile: async (inputContent) => {
       return async () => {
