@@ -1,5 +1,5 @@
 const stub = (query: string): MediaQueryList => {
-  return (<unknown>{
+  return ({
     media: query,
     addListener() {},
     removeListener() {},
@@ -7,7 +7,7 @@ const stub = (query: string): MediaQueryList => {
     removeEventListener() {},
     matches: false,
     onchange: null,
-  }) as MediaQueryList;
+  }) as unknown as MediaQueryList;
 };
 
 /**
