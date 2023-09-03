@@ -114,7 +114,7 @@ export class CanvasRenderer implements IRenderer {
     // draw Player
     if (level.playerAlive && playerPosition) {
       const x = playerPosition.x - levelPosition.x;
-      const y = playerPosition.x - levelPosition.y;
+      const y = playerPosition.y - levelPosition.y;
       const dx = offset.x * pixelRatio + x * tileSize * pixelRatio;
       const dy = offset.y * pixelRatio + y * tileSize * pixelRatio;
       this.context.imageSmoothingEnabled = false;

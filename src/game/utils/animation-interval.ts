@@ -9,13 +9,13 @@ export interface AnimationInterval {
 
 export class AnimationLoop implements IDisposable {
 
-  lastTimestamp = 0;
-  timer = NaN;
+  #lastTimestamp = 0;
+  #timer = NaN;
 
   intervals: AnimationInterval[] = [];
 
   get running() {
-    return (! Number.isNaN(this.timer));
+    return (! Number.isNaN(this.#timer));
   }
 
   add(callback: FrameRequestCallback, timeout: number) {
@@ -28,21 +28,21 @@ export class AnimationLoop implements IDisposable {
   }
 
   run() {
-    if (Number.isNaN(this.timer)) {
-      this.lastTimestamp = -Infinity;
-      this.timer = requestAnimationFrame(this.loop);
+    if (Number.isNaN(this.#timer)) {
+      this.#lastTimestamp = -Infinity;
+      this.#timer = requestAnimationFrame(this.loop);
     }
   }
 
   stop() {
-    if (! Number.isNaN(this.timer)) {
-      cancelAnimationFrame(this.timer);
-      this.timer = NaN;
+    if (! Number.isNaN(this.#timer)) {
+      cancelAnimationFrame(this.#timer);
+      this.#timer = NaN;
     }
   }
 
   loop = (t: DOMHighResTimeStamp) => {
-    const timePassed = (t - this.lastTimestamp);
+    const timePassed = (t - this.#lastTimestamp);
     for (const interval of this.intervals) {
       interval.elapsed += timePassed;
       if (interval.elapsed >= interval.timeout) {
@@ -51,13 +51,12 @@ export class AnimationLoop implements IDisposable {
         interval.callback(t);
       }
     }
-    this.lastTimestamp = t;
-    this.timer = requestAnimationFrame(this.loop);
+    this.#lastTimestamp = t;
+    this.#timer = requestAnimationFrame(this.loop);
   }
 
   dispose(): void | Promise<void> {
     this.intervals.splice(0, this.intervals.length);
     this.stop();
   }
-
 }

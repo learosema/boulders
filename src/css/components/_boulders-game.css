@@ -9,6 +9,18 @@ boulders-game {
     position: absolute;
   }
   
+  &:not(:has(canvas:focus)) {
+    &::after {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      pointer-events: none;
+      content: 'PAUSE';
+    }
+  }
+
   > canvas {
     display: block;
     top: 0;
@@ -17,6 +29,15 @@ boulders-game {
     height: 100%;
     background: #000;
     image-rendering: pixelated;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:not(:focus) {
+      opacity: 0.5;
+      filter: blur(2px);
+    }
   }
 
   > button {
