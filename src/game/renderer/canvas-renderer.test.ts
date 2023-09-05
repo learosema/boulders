@@ -1,5 +1,4 @@
 import { CanvasRenderer } from './canvas-renderer';
-import { CanvasRenderingContext2D } from 'canvas';
 
 describe('Canvas Renderer', () => {
   let canvas: HTMLCanvasElement, sprites: HTMLImageElement;
@@ -23,10 +22,6 @@ describe('Canvas Renderer', () => {
     await renderer.setup();
     expect(renderer.context).toBeTruthy();
     expect(renderer.context).toBeInstanceOf(CanvasRenderingContext2D);
-  });
-
-  it('should render a level', () => {
-
   });
 
 });
