@@ -1,3 +1,4 @@
+import { Level } from '../utils/level';
 import { CanvasRenderer } from './canvas-renderer';
 
 describe('Canvas Renderer', () => {
@@ -22,6 +23,20 @@ describe('Canvas Renderer', () => {
     await renderer.setup();
     expect(renderer.context).toBeTruthy();
     expect(renderer.context).toBeInstanceOf(CanvasRenderingContext2D);
+  });
+
+  it('should render a level', async () => {
+    canvas.width = 320;
+    canvas.height = 200;
+    window.devicePixelRatio = 1;
+    const renderer = new CanvasRenderer(canvas, sprites);
+    await renderer.setup();
+    const level = Level.parse(`
+      ####
+      #P.#
+      ####
+    `);
+    expect(() => renderer.frame(level)).not.toThrow();
   });
 
 });
