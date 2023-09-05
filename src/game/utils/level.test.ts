@@ -50,5 +50,4 @@ describe('Level class', () => {
     level.setField(0,2, Field.SAND);
     expect(level.getField(0,2)).toEqual(Field.SAND);
   });
-
-})
+});
