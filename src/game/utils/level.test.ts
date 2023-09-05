@@ -17,6 +17,15 @@ describe('Level class', () => {
     ])
   });
 
+  it('should set the initial player position', () => {
+    const level = Level.parse(`
+      ###
+      #P#
+      ###
+    `);
+    expect(level.playerPosition).toEqual({x:1, y:1});
+  });
+
   it('can retrieve a field at a given position', () => {
     const level = Level.parse(`
       ##$
@@ -50,4 +59,38 @@ describe('Level class', () => {
     level.setField(0,2, Field.SAND);
     expect(level.getField(0,2)).toEqual(Field.SAND);
   });
+  
+  it('should provide a move method for moving the player', () => {
+    const level = Level.parse(`
+      #####
+      #P .#
+      #####
+    `);
+    
+    level.move(1, 0);
+    expect(playerPosition).toEqual({x: 2, y: 1});
+  });
+  
+  it('should be possible to move onto a sand field via move()', () => {
+    const level = Level.parse(`
+      #####
+      # P.#
+      #####
+    `);
+    
+    level.move(1, 0);
+    expect(playerPosition).toEqual({x: 3, y: 1});
+  });
+  
+  it('should not be possible to move onto a wall field via move()', () => {
+    const level = Level.parse(`
+      #####
+      #  P#
+      #####
+    `);
+    
+    level.move(1, 0);
+    expect(playerPosition).toEqual({x: 3, y: 1});
+  });  
+  
 });
