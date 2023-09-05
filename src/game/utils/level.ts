@@ -69,7 +69,7 @@ export class Level {
     const map = data.replace(/\/\/.\n/g, '')
       .trim()
       .split(/[\n,]/)
-      .map((row, rowIndex) => row.split('').map((col, colIndex) => {
+      .map((row, rowIndex) => row.trim().split('').map((col, colIndex) => {
         const thing = symbols.indexOf(col);
         if (thing === Field.PLAYER) {
           position = {
