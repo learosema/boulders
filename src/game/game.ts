@@ -113,7 +113,7 @@ export class BouldersGame extends HTMLElement {
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
-    if (e.code === 'ArrowUp' || e.code === 'KeyA') {
+    if (e.code === 'ArrowUp' || e.code === 'KeyW') {
       this.inputQueue.push('up');
     }
     if (e.code === 'ArrowDown' || e.code === 'KeyS') {
