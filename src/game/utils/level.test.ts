@@ -137,6 +137,20 @@ describe('Level class', () => {
     expect(level.playerDirection).toEqual(Direction.RIGHT);
   });
 
+  it('should move a stone to the right when moving right and there is empty space.', () => {
+    const level = Level.parse(`
+      #####
+      #Po #
+      #####
+    `);
+
+    level.move(1, 0);
+    expect(level.playerPosition).toEqual({x:2, y: 1});
+    expect(level.getField(3,1)).toEqual(Field.STONE);
+  });
+
+
+
   it('should count up the collectedGems property when a gem is collected via move() and notify subscribers about it', () => {
     const level = Level.parse(`
       ####
