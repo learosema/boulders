@@ -2,6 +2,10 @@ import { Direction, Field, Level } from "./level";
 
 describe('Level class', () => {
 
+  it('should be able to create a zero-dimension Level', () => {
+    expect(() => new Level([], null));
+  });
+
   it('can parse text and then creates a level from it', () => {
     const level = Level.parse(`
       #######
