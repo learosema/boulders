@@ -91,6 +91,16 @@ describe('Level class', () => {
     
     level.move(1, 0);
     expect(playerPosition).toEqual({x: 3, y: 1});
-  });  
+  });
   
+  it('should not be possible to move diagonally via move()', () => {
+    const level = Level.parse(`
+      #####
+      # P #
+      #   #
+      #####
+    `);
+    expect(() => level.move(1, 1)).toThrow();
+    expect(playerPosition).toEqual({x: 3, y: 1});
+  });
 });
