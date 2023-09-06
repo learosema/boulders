@@ -30,7 +30,7 @@ export type Dimension = {
 export class Level {
 
   constructor(
-    public level: Field[][] = [],
+    public level: Field[][],
     public playerPosition: Position|null,
   ) {
     this.numGems = this.countGems();

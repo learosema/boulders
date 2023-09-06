@@ -3,7 +3,12 @@ import { Direction, Field, Level } from "./level";
 describe('Level class', () => {
 
   it('should be able to create a zero-dimension Level', () => {
-    expect(() => new Level([], null));
+    expect(() => new Level([], null)).not.toThrow();
+  });
+
+  it('should return dimension 0 for a zero-dimension level', () => {
+    const level = new Level([], null);
+    expect(level.dimensions).toEqual({width: 0, height: 0});
   });
 
   it('can parse text and then creates a level from it', () => {
@@ -13,6 +18,7 @@ describe('Level class', () => {
       #.P.GX#
       #######
     `);
+    expect(level.dimensions).toEqual({width: 7, height: 4});
     expect(level.level).toStrictEqual([
       [Field.WALL, Field.WALL, Field.WALL, Field.WALL, Field.WALL, Field.WALL, Field.WALL,],
       [Field.WALL, Field.SAND, Field.SAND, Field.GEM, Field.SAND, Field.SAND, Field.WALL,],
