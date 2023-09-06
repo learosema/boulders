@@ -18,6 +18,7 @@ export class BouldersGame extends HTMLElement {
   inputQueue: string[] = [];
   audioContext = new AudioContext();
   mainGain = this.audioContext.createGain();
+  framecycles = 0;
 
   constructor() {
     super();
@@ -89,6 +90,7 @@ export class BouldersGame extends HTMLElement {
       this.animationLoop = new AnimationLoop();
       this.animationLoop.add(this.renderLoop, 1000 / 25);
       this.animationLoop.add(this.inputLoop, 50);
+      this.animationLoop.add(this.stoneLoop, 200);
       this.level.subscribe(this.onGameEvent)
     }
     this.initialized = true;
@@ -146,8 +148,18 @@ export class BouldersGame extends HTMLElement {
   }
 
   renderLoop = (t: DOMHighResTimeStamp) => {
+    if (!this.level) {
+      return;
+    }
     if (this.level) {
       this.renderer?.frame(this.level);
+    }
+  }
+
+  stoneLoop = () => {
+    if (this.level) {
+      this.level?.stoneFall();
+      this.renderer?.frame(this.level!);
     }
   }
 

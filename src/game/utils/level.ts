@@ -47,6 +47,8 @@ export class Level {
 
   collectedGems = 0;
 
+  fallingItems = [];
+
   playerAlive = true;
 
   numGems = 0;
@@ -152,6 +154,35 @@ export class Level {
       const field = this.level[y][x];
       if (typeof field !== 'undefined') {
         this.level[y][x] = value;
+      }
+    }
+  }
+
+  stoneFall() {
+    if (this.playerPosition !== null && this.playerAlive) {
+      if (this.getField(this.playerPosition.x, this.playerPosition.y) === Field.EMPTY) {
+        this.setField(this.playerPosition.x, this.playerPosition.y, Field.PLAYER);
+      }
+    }
+
+    for (let y = this.dimensions.height; y >= 0; y--) {
+      for (let x = 0; x < this.dimensions.width; x++) {
+        const field = this.getField(x, y);
+        const below = this.getField(x, y + 1);
+        if (field !== Field.STONE && field !== Field.GEM) {
+          continue;
+        }
+        if (below === Field.EMPTY) {
+          this.setField(x, y + 1, field);
+          this.setField(x, y, Field.EMPTY);
+          continue;
+        }
+      }
+    }
+
+    if (this.playerPosition !== null && this.playerAlive) {
+      if (this.getField(this.playerPosition.x, this.playerPosition.y) === Field.PLAYER) {
+        this.setField(this.playerPosition.x, this.playerPosition.y, Field.EMPTY);
       }
     }
   }

@@ -161,4 +161,25 @@ describe('Level class', () => {
 
     expect(() => level.move(1, 0)).toThrow();
   });
+
+  it('should process stones falling down', () => {
+    const level = Level.parse(`
+      ####
+      #Po#
+      #. #
+      ####
+    `);
+
+    const spy = jest.fn();
+    level.stoneFall();
+
+    // there are no items in free fall
+    expect(level.fallingItems).toStrictEqual([]);
+
+    // but one stone hit the ground or another obsacle
+    // expect(spy).toHaveBeenCalledWith('stone', undefined);
+
+    expect(level.getField(2, 1)).toEqual(Field.EMPTY);
+    expect(level.getField(2, 2)).toEqual(Field.STONE);
+  });
 });
