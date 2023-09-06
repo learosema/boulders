@@ -1,4 +1,4 @@
-import { Field, Level } from "./level";
+import { Direction, Field, Level } from "./level";
 
 describe('Level class', () => {
 
@@ -101,6 +101,54 @@ describe('Level class', () => {
       #####
     `);
     expect(() => level.move(1, 1)).toThrow();
-    expect(level.playerPosition).toEqual({x: 3, y: 1});
+    expect(level.playerPosition).toEqual({x: 2, y: 1});
+  });
+
+  it('shoud set the playerDirection to Direction.LEFT when moving left', () => {
+    const level = Level.parse(`
+      #####
+      #  P#
+      #####
+    `);
+
+    level.move(-1, 0);
+    expect(level.playerDirection).toEqual(Direction.LEFT);
+  });
+
+  it('should set the playerDirection to Direction.RIGHT when moving right', () => {
+    const level = Level.parse(`
+      #####
+      #P  #
+      #####
+    `);
+    level.playerDirection = Direction.LEFT;
+
+    level.move(1, 0);
+    expect(level.playerDirection).toEqual(Direction.RIGHT);
+  });
+
+  it('should count up the collectedGems property when a gem is collected via move() and notify subscribers about it', () => {
+    const level = Level.parse(`
+      ####
+      #P$#
+      ####
+    `);
+    const spy = jest.fn();
+    level.subscribe(spy);
+
+    level.move(1, 0);
+    expect(level.collectedGems).toEqual(1);
+    expect(spy).toHaveBeenCalledWith('gem', undefined);
+  });
+
+  it('should throw an Error when trying to move but the player is not alive', () => {
+    const level = Level.parse(`
+      ####
+      #P #
+      ####
+    `);
+    level.playerAlive = false;
+
+    expect(() => level.move(1, 0)).toThrow();
   });
 });
