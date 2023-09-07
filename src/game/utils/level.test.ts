@@ -213,4 +213,21 @@ describe('Level class', () => {
     expect(spy).toHaveBeenCalledWith('ground', {x:2, y:2});
   });
 
+  it('should kill the player when a stone falls down on them', () => {
+    const level = Level.parse(`
+      ###
+      #o#
+      # #
+      #P#
+      ###
+    `);
+    const spy = jest.fn();
+    level.subscribe(spy);
+
+    level.stoneFall();
+    level.stoneFall();
+
+    expect(level.playerAlive).toBe(false);
+  });
+
 });

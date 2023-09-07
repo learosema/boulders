@@ -25,12 +25,14 @@ export class FreqMod {
     public audioContext: AudioContext,
     public destination: AudioNode,
     public modulationFrequency = 12,
-    public modulationDepth = 4) {
+    public modulationDepth = 4,
+    carrierType: OscillatorType = 'square',
+    modulatorType: OscillatorType = 'square') {
     this.audioContext = audioContext;
     this.modulationDepth = modulationDepth;
     this.modulationFrequency = modulationFrequency;
-    this.carrier = createOscGainNode(this.audioContext, 'square');
-    this.modulator = createOscGainNode(this.audioContext, 'square');
+    this.carrier = createOscGainNode(this.audioContext, carrierType);
+    this.modulator = createOscGainNode(this.audioContext, modulatorType);
 
     this.modulator.osc.connect(this.modulator.gain);
     this.modulator.gain.connect(this.carrier.osc.frequency);
@@ -39,13 +41,14 @@ export class FreqMod {
     this.carrier.gain.connect(destination);
   }
 
-  play(note: string, startTime: number, endTime: number) {
+  play(note: string, startTime: number, endTime: number, startVolume = 1, endVolume = 0) {
     const frequency = noteToFrequency(note);
     this.carrier.osc.frequency.setValueAtTime(frequency, startTime);
     this.modulator.osc.frequency.setValueAtTime(this.modulationFrequency, startTime);
     this.modulator.gain.gain.setValueAtTime(frequency / this.modulationDepth, startTime);
-    this.carrier.gain.gain.setValueAtTime(1, startTime);
-    this.carrier.gain.gain.linearRampToValueAtTime(0, endTime);
+    this.carrier.gain.gain.setValueAtTime(startVolume, startTime);
+    this.carrier.gain.gain.linearRampToValueAtTime(endVolume, endTime);
+    this.carrier.gain.gain.setValueAtTime(0, endTime + 0.00001);
   }
 
   dispose() {

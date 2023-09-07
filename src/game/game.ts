@@ -122,6 +122,11 @@ export class BouldersGame extends HTMLElement {
       FM.play('C6', this.audioContext.currentTime, this.audioContext.currentTime + .25);
       setTimeout(() => FM.dispose(), 500);
     }
+    if (eventName === 'push') {
+      const FM = new FreqMod(this.audioContext, this.mainGain, 1, 4, 'sawtooth', 'sine');
+      FM.play('C0', this.audioContext.currentTime, this.audioContext.currentTime + .25, 0, 1);
+      setTimeout(() => FM.dispose(), 250);
+    }
   }
 
   onKeyDown = (e: KeyboardEvent) => {

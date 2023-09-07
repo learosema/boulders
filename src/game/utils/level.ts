@@ -129,6 +129,18 @@ export class Level {
     }
 
     const field = this.getField(newPos.x, newPos.y);
+
+    if (field === Field.STONE && yr === 0) {
+      const nextField = this.getField(newPos.x + xr, newPos.y);
+      if (nextField === Field.EMPTY) {
+        this.setField(newPos.x, newPos.y, Field.EMPTY);
+        this.setField(newPos.x + xr, newPos.y, Field.STONE);
+        playerPosition.x = newPos.x;
+        playerPosition.y = newPos.y;
+        this.notify('push');
+      }
+    }
+
     if (field === Field.GEM) {
       this.collectedGems += 1;
       this.notify('gem');
