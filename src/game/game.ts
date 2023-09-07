@@ -101,6 +101,19 @@ export class BouldersGame extends HTMLElement {
     this.canvas.addEventListener('focus', this.onFocus, false);
     this.canvas.addEventListener('blur', this.onBlur, false);
     this.canvas.addEventListener('keydown', this.onKeyDown, false);
+    window.addEventListener('resize', this.onResize, false);
+  }
+
+  dispose() {
+    if (this.canvas) {
+      this.canvas.removeEventListener('focus', this.onFocus, false);
+      this.canvas.removeEventListener('blur', this.onBlur, false);
+      this.canvas.removeEventListener('keydown', this.onKeyDown, false);
+    }
+    this.renderer?.dispose();
+    this.animationLoop?.dispose();
+    this.renderer = null;
+    window.removeEventListener('resize', this.onResize, false);
   }
 
   onGameEvent: LevelCallbackFunction = (eventName: string) => {
@@ -141,10 +154,11 @@ export class BouldersGame extends HTMLElement {
     this.animationLoop?.stop();
   }
 
-  dispose() {
-    this.renderer?.dispose();
-    this.renderer = null;
-    window.removeEventListener('keydown', this.onKeyDown, false);
+  onResize = () => {
+    this.renderer?.setSize();
+    if (this.level) {
+      this.renderer?.frame(this.level);
+    }
   }
 
   renderLoop = (t: DOMHighResTimeStamp) => {

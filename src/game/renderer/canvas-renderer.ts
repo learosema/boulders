@@ -39,13 +39,10 @@ export class CanvasRenderer implements IRenderer {
     if (! this.context) {
       throw new Error('Context failed to initialize');
     }
-
-    this.onResize();
-    window.addEventListener('resize', this.onResize, false);
-
+    this.setSize();
   }
 
-  onResize = () => {
+  setSize() {
     this.pixelRatio = pixelRatio();
     this.dimensions = {
       width: this.canvas.clientWidth * this.pixelRatio,
@@ -128,6 +125,5 @@ export class CanvasRenderer implements IRenderer {
   }
 
   dispose(): void | Promise<void> {
-    window.removeEventListener('resize', this.onResize, false);
   }
 }

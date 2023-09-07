@@ -4,6 +4,7 @@ boulders-game {
 
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   
   > *:not(script) {
     position: absolute;
