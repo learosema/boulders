@@ -184,16 +184,33 @@ describe('Level class', () => {
       ####
     `);
 
-    const spy = jest.fn();
     level.stoneFall();
 
-    // there are no items in free fall
-    expect(level.fallingItems).toStrictEqual([]);
-
-    // but one stone hit the ground or another obsacle
-    // expect(spy).toHaveBeenCalledWith('stone', undefined);
+    // there is one item currently in free fall
+    expect(level.fallingItems).toStrictEqual([{x:2, y:2}]);
 
     expect(level.getField(2, 1)).toEqual(Field.EMPTY);
     expect(level.getField(2, 2)).toEqual(Field.STONE);
   });
+
+  it('should notify subscribers when a stone stops falling down', () => {
+    const level = Level.parse(`
+      ####
+      #P #
+      #.o#
+      ####
+    `);
+    level.fallingItems = [{x:2, y:2}];
+    const spy = jest.fn();
+    level.subscribe(spy);
+
+    level.stoneFall();
+
+    // as the falling stone has hit the ground,
+    // fallingItems shozld be empty now
+    expect(level.fallingItems).toStrictEqual([]);
+
+    expect(spy).toHaveBeenCalledWith('ground', {x:2, y:2});
+  });
+
 });

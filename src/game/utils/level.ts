@@ -47,7 +47,7 @@ export class Level {
 
   collectedGems = 0;
 
-  fallingItems = [];
+  fallingItems: Array<Position> = [];
 
   playerAlive = true;
 
