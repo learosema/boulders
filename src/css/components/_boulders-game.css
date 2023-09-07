@@ -6,7 +6,7 @@ boulders-game {
   height: 100vh;
   height: 100dvh;
   
-  > *:not(script) {
+  > canvas {
     position: absolute;
   }
   
