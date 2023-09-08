@@ -231,6 +231,7 @@ export class Level {
           this.setField(x    , y, Field.GEM);
           this.setField(x + 1, y, Field.GEM);
           this.setField(x - 1, y + 1, Field.GEM);
+          this.setField(x    , y + 1, Field.GEM);
           this.setField(x + 1, y + 1, Field.GEM);
           this.setField(x - 1, y + 2, Field.GEM);
           this.setField(x    , y + 2, Field.GEM);
