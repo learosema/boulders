@@ -1,4 +1,4 @@
-import { FreqMod } from "./audio/FreqMod";
+import { FreqMod, createFilter } from "./audio/FreqMod";
 import { IRenderer } from "./interfaces/irenderer";
 import { CanvasRenderer } from "./renderer/canvas-renderer";
 import { AnimationLoop } from "./utils/animation-interval";
@@ -18,7 +18,8 @@ export class BouldersGame extends HTMLElement {
   inputQueue: string[] = [];
   audioContext = new AudioContext();
   mainGain = this.audioContext.createGain();
-  audioFilter = this.audioContext.createBiquadFilter();
+  lowPass1 = createFilter(this.audioContext, 'lowpass', 800);
+  lowPass2 = createFilter(this.audioContext, 'lowpass', 350);
   framecycles = 0;
 
   constructor() {
@@ -72,11 +73,8 @@ export class BouldersGame extends HTMLElement {
 
   private async setup() {
     this.audioContext.resume();
-    this.audioFilter.type = 'lowpass';
-    this.audioFilter.frequency.value = 400;
-    this.audioFilter.connect(this.mainGain);
 
-    this.mainGain.gain.value = .1;
+    this.mainGain.gain.value = .25;
     this.mainGain.connect(this.audioContext.destination);
     if (! this.sprites) {
       this.sprites = await loadImage('/gfx/sprites.png');
@@ -123,13 +121,18 @@ export class BouldersGame extends HTMLElement {
 
   onGameEvent: LevelCallbackFunction = (eventName: string) => {
     if (eventName === 'gem') {
-      const FM = new FreqMod(this.audioContext, this.audioFilter, 12, 4);
+      const FM = new FreqMod(this.audioContext, 12, 4).withFilter(this.lowPass1).toDestination(this.mainGain);
       FM.play('C6', this.audioContext.currentTime, this.audioContext.currentTime + .25);
       setTimeout(() => FM.dispose(), 500);
     }
     if (eventName === 'push') {
-      const FM = new FreqMod(this.audioContext, this.audioFilter, 1, 4, 'sawtooth', 'sine');
-      FM.play('C0', this.audioContext.currentTime, this.audioContext.currentTime + .25, 0, 1);
+      const FM = new FreqMod(this.audioContext, 2, 2, 'sawtooth', 'sine').withFilter(this.lowPass2).toDestination(this.mainGain);
+      FM.play('C0', this.audioContext.currentTime, this.audioContext.currentTime + .25, .5, 1);
+      setTimeout(() => FM.dispose(), 250);
+    }
+    if (eventName === 'ground') {
+      const FM = new FreqMod(this.audioContext, 2, 2, 'sawtooth', 'sawtooth').withFilter(this.lowPass2).toDestination(this.mainGain);
+      FM.play('A0', this.audioContext.currentTime, this.audioContext.currentTime + .25);
       setTimeout(() => FM.dispose(), 250);
     }
   }

@@ -16,14 +16,26 @@ const createOscGainNode = (AC: AudioContext, type: OscillatorType = 'square') =>
   return node;
 }
 
+export const createFilter = (AC: AudioContext, type: BiquadFilterType, frequency: number, Q?: number) => {
+  const filter = AC.createBiquadFilter();
+  filter.type = type;
+  filter.frequency.value = frequency;
+  if (typeof Q !== 'undefined') {
+    filter.Q.value = Q;
+  }
+  return filter;
+}
+
 export class FreqMod {
 
   carrier: OscGainNode;
   modulator: OscGainNode;
+  output: AudioNode;
+  destination: AudioNode|null = null;
+  filter: BiquadFilterNode|null = null;
 
   constructor(
     public audioContext: AudioContext,
-    public destination: AudioNode,
     public modulationFrequency = 12,
     public modulationDepth = 4,
     carrierType: OscillatorType = 'square',
@@ -38,7 +50,20 @@ export class FreqMod {
     this.modulator.gain.connect(this.carrier.osc.frequency);
 
     this.carrier.osc.connect(this.carrier.gain);
-    this.carrier.gain.connect(destination);
+    this.output = this.carrier.gain
+  }
+
+  withFilter(filter: BiquadFilterNode) {
+    this.filter = filter;
+    this.carrier.gain.connect(this.filter)
+    this.output = this.filter;
+    return this;
+  }
+
+  toDestination(destination: AudioNode|null = null) {
+    this.destination = destination || this.audioContext.destination;
+    this.output.connect(this.destination);
+    return this;
   }
 
   play(note: string, startTime: number, endTime: number, startVolume = 1, endVolume = 0) {
@@ -58,5 +83,6 @@ export class FreqMod {
     this.modulator.gain.disconnect();
     this.carrier.gain.disconnect();
     this.modulator.gain.disconnect();
+    this.filter?.disconnect();
   }
 }

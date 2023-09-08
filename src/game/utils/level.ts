@@ -1,5 +1,11 @@
 export type LevelCallbackFunction = (eventName: string, payload?: any) => void;
 
+export enum Flag {
+  NONE = 0,
+  FALLING = 1,
+  EXIT = 2,
+};
+
 export enum Field {
   EMPTY = 0,
   WALL = 1,
@@ -28,11 +34,16 @@ export type Dimension = {
 };
 
 export class Level {
+  /**
+   * Additional store for flags for each field
+   */
+  flags: Flag[][];
 
   constructor(
     public level: Field[][],
     public playerPosition: Position|null,
   ) {
+    this.flags = level.map(row => row.map(x => 0));
     this.numGems = this.countGems();
   }
 
@@ -158,7 +169,7 @@ export class Level {
     const yMax = level.length - 1;
     const row = y >= 0 && y <= yMax ? level[y] : undefined;
     const field = row instanceof Array ? row[x] : undefined;
-    return typeof field === "number" ? field : 1;
+    return typeof field === "number" ? field : Field.WALL;
   }
 
   setField(x: number, y: number, value: Field) {
@@ -166,6 +177,23 @@ export class Level {
       const field = this.level[y][x];
       if (typeof field !== 'undefined') {
         this.level[y][x] = value;
+      }
+    }
+  }
+
+  getFlag(x: number, y: number) {
+    const { flags } = this;
+    const yMax = flags.length - 1;
+    const row = y >= 0 && y <= yMax ? flags[y] : undefined;
+    const flag = row instanceof Array ? row[x] : undefined;
+    return typeof flag === "number" ? flag : Flag.NONE;
+  }
+
+  setFlag(x: number, y: number, value: Flag) {
+    if (y >= 0 && y < this.dimensions.height && x >= 0 && x < this.dimensions.width) {
+      const field = this.level[y][x];
+      if (typeof field !== 'undefined') {
+        this.flags[y][x] = value;
       }
     }
   }
@@ -180,6 +208,7 @@ export class Level {
     for (let y = this.dimensions.height; y >= 0; y--) {
       for (let x = 0; x < this.dimensions.width; x++) {
         const field = this.getField(x, y);
+        const flag = this.getFlag(x, y);
         const below = this.getField(x, y + 1);
         if (field !== Field.STONE && field !== Field.GEM) {
           continue;
@@ -187,8 +216,56 @@ export class Level {
         if (below === Field.EMPTY) {
           this.setField(x, y + 1, field);
           this.setField(x, y, Field.EMPTY);
+          this.setFlag(x, y, Flag.NONE);
+          this.setFlag(x, y + 1, Flag.FALLING);
           continue;
         }
+
+        if (below === Field.PLAYER && flag === Flag.FALLING) {
+          this.setField(x, y + 1, field);
+          this.setField(x, y, Field.EMPTY);
+          this.setFlag(x, y, Flag.NONE);
+          this.setFlag(x, y + 1, Flag.FALLING);
+
+          this.setField(x - 1, y - 1, Field.GEM);
+          this.setField(x    , y - 1, Field.GEM);
+          this.setField(x + 1, y - 1, Field.GEM);
+          this.setField(x - 1, y, Field.GEM);
+          this.setField(x + 1, y, Field.GEM);
+          this.setField(x - 1, y + 1, Field.GEM);
+          this.setField(x    , y + 1, Field.GEM);
+          this.setField(x + 1, y + 1, Field.GEM);
+
+          this.playerAlive = false;
+          this.notify('gameover');
+          continue;
+        }
+
+        if (below === Field.GEM || below === Field.STONE) {
+          const right = this.getField(x + 1, y);
+          const rightBelow = this.getField(x + 1, y + 1);
+          if (right === Field.EMPTY && rightBelow === Field.EMPTY) {
+            this.setField(x + 1, y, field);
+            this.setField(x, y, Field.EMPTY);
+            this.setFlag(x, y, Flag.NONE);
+            this.setFlag(x + 1, y, Flag.FALLING);
+            continue;
+          }
+          const left = this.getField(x - 1, y);
+          const leftBelow = this.getField(x - 1, y + 1);
+          if (left === Field.EMPTY && leftBelow === Field.EMPTY) {
+            this.setField(x - 1, y, field);
+            this.setField(x, y, Field.EMPTY);
+            this.setFlag(x, y, Flag.NONE);
+            this.setFlag(x - 1, y, Flag.FALLING);
+            continue;
+          }
+        }
+        if (flag === Flag.FALLING) {
+          this.notify('ground');
+          this.setFlag(x, y, Flag.NONE);
+        }
+
       }
     }
 
