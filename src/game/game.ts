@@ -18,6 +18,7 @@ export class BouldersGame extends HTMLElement {
   inputQueue: string[] = [];
   audioContext = new AudioContext();
   mainGain = this.audioContext.createGain();
+  audioFilter = this.audioContext.createBiquadFilter();
   framecycles = 0;
 
   constructor() {
@@ -71,7 +72,11 @@ export class BouldersGame extends HTMLElement {
 
   private async setup() {
     this.audioContext.resume();
-    this.mainGain.gain.value = .2;
+    this.audioFilter.type = 'lowpass';
+    this.audioFilter.frequency.value = 400;
+    this.audioFilter.connect(this.mainGain);
+
+    this.mainGain.gain.value = .1;
     this.mainGain.connect(this.audioContext.destination);
     if (! this.sprites) {
       this.sprites = await loadImage('/gfx/sprites.png');
@@ -118,12 +123,12 @@ export class BouldersGame extends HTMLElement {
 
   onGameEvent: LevelCallbackFunction = (eventName: string) => {
     if (eventName === 'gem') {
-      const FM = new FreqMod(this.audioContext, this.mainGain, 12, 4);
+      const FM = new FreqMod(this.audioContext, this.audioFilter, 12, 4);
       FM.play('C6', this.audioContext.currentTime, this.audioContext.currentTime + .25);
       setTimeout(() => FM.dispose(), 500);
     }
     if (eventName === 'push') {
-      const FM = new FreqMod(this.audioContext, this.mainGain, 1, 4, 'sawtooth', 'sine');
+      const FM = new FreqMod(this.audioContext, this.audioFilter, 1, 4, 'sawtooth', 'sine');
       FM.play('C0', this.audioContext.currentTime, this.audioContext.currentTime + .25, 0, 1);
       setTimeout(() => FM.dispose(), 250);
     }
