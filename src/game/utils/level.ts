@@ -227,14 +227,14 @@ export class Level {
           this.setFlag(x, y, Flag.NONE);
           this.setFlag(x, y + 1, Flag.FALLING);
 
-          this.setField(x - 1, y - 1, Field.GEM);
-          this.setField(x    , y - 1, Field.GEM);
-          this.setField(x + 1, y - 1, Field.GEM);
           this.setField(x - 1, y, Field.GEM);
+          this.setField(x    , y, Field.GEM);
           this.setField(x + 1, y, Field.GEM);
           this.setField(x - 1, y + 1, Field.GEM);
-          this.setField(x    , y + 1, Field.GEM);
           this.setField(x + 1, y + 1, Field.GEM);
+          this.setField(x - 1, y + 2, Field.GEM);
+          this.setField(x    , y + 2, Field.GEM);
+          this.setField(x + 1, y + 2, Field.GEM);
 
           this.playerAlive = false;
           this.notify('gameover');
