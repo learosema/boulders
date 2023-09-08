@@ -135,6 +135,14 @@ export class BouldersGame extends HTMLElement {
       FM.play('A0', this.audioContext.currentTime, this.audioContext.currentTime + .25);
       setTimeout(() => FM.dispose(), 250);
     }
+    if (eventName === 'gameover') {
+      const FM = new FreqMod(this.audioContext, 24, 4).withFilter(this.lowPass1).toDestination(this.mainGain);
+      FM.play('D#3', this.audioContext.currentTime, this.audioContext.currentTime + .25);
+      FM.play('D3', this.audioContext.currentTime + .26, this.audioContext.currentTime + .5);
+      FM.play('A#2', this.audioContext.currentTime + .51, this.audioContext.currentTime + .75);
+      FM.play('G2', this.audioContext.currentTime + .76, this.audioContext.currentTime + 1.);
+      setTimeout(() => FM.dispose(), 1300);
+    }
   }
 
   onKeyDown = (e: KeyboardEvent) => {
