@@ -2,7 +2,7 @@
 
 {% block main %}
 <h1 class="v-hidden">{{ title }}</h1>
-<boulders-game>
+<boulders-game autofocus>
   <script type="text/plain" data-type="level">
   {{ content | safe }}
   </script>
@@ -22,7 +22,7 @@
   <form method="dialog">
     <button class="button">Return to game</button>
   </form>
-  <button class="button">Restart game</button>
+  <a href="{{ meta.url }}{{ page.url }}" class="button">Restart game</a>
   <a href="{{ meta.url }}" class="button">Back to main menu</a>
 </dialog>
 
