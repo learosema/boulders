@@ -83,6 +83,5 @@ export class FreqMod {
     this.modulator.gain.disconnect();
     this.carrier.gain.disconnect();
     this.modulator.gain.disconnect();
-    this.filter?.disconnect();
   }
 }
