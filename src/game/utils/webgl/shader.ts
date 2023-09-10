@@ -16,7 +16,7 @@ function compileShader(gl: WebGLRenderingContext, shaderType: ShaderType, code: 
   return sh;
 }
 
-function createProgram(
+export function createProgram(
   gl: WebGLRenderingContext,
   vertexShader: string,
   fragmentShader: string

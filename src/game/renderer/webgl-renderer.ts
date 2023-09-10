@@ -3,6 +3,10 @@ import { IRenderer } from "../interfaces/irenderer";
 import { Level, Position } from "../utils/level";
 import { BufferGeometry } from "../utils/webgl/buffer-geometry";
 import { TextureFilter, Texture } from "../utils/webgl/texture";
+import vertexShader from './webgl-shaders/vert.glsl';
+import fragmentShader from './webgl-shaders/frag.glsl';
+import { createProgram } from "../utils/webgl/shader";
+import { pixelRatio } from "../utils/pixel-ratio";
 
 export class WebGLRenderer implements IRenderer {
 
@@ -51,15 +55,29 @@ export class WebGLRenderer implements IRenderer {
     }
     this.spriteTexture = new Texture(this.sprites);
     this.spriteTexture.upload(this.gl, 0);
-
+    this.createBuffers();
+    this.program = createProgram(this.gl, vertexShader, fragmentShader);
+    this.gl.useProgram(this.program);
+    this.enableBuffers();
   }
 
-  frame(level: Level, levelPosition?: Position | undefined, offset?: Position | undefined): void {
-
+  frame(_level: Level, _levelPosition?: Position | undefined, _offset?: Position | undefined): void {
+    const { gl } = this;
+    gl?.drawArrays(WebGLRenderingContext.TRIANGLES, 0, 6);
   }
 
-  setSize(): void {
+  setSize() {
+    this.pixelRatio = pixelRatio();
+    this.dimensions = {
+      width: this.canvas.clientWidth * this.pixelRatio,
+      height: this.canvas.clientHeight * this.pixelRatio,
+    };
+    const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
+    // display at least 10x10 tiles on screen.
+    this.tileSize = Math.min(64, Math.round(viewportMin / 10));
+
+    Object.assign(this.canvas, this.dimensions);
   }
 
   dispose() {}
