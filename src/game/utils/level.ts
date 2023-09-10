@@ -71,6 +71,10 @@ export class Level {
     this.listeners.push(callback);
   }
 
+  unsubscribe() {
+    this.listeners.splice(0, this.listeners.length);
+  }
+
   notify(eventName: string, payload?: any) {
     for (const listener of this.listeners) {
       listener(eventName, payload)

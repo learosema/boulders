@@ -2,6 +2,7 @@
 // CSS and JavaScript as first-class citizens in Eleventy: https://pepelsbey.dev/articles/eleventy-css-js/
 
 const esbuild = require('esbuild');
+const { glsl } = require('esbuild-plugin-glsl');
 const path = require('path');
 
 module.exports = (eleventyConfig) => {
@@ -14,7 +15,6 @@ module.exports = (eleventyConfig) => {
       const basedir = path.basename(parsedPath.dir);
 
       if (path.basename(fullPath) !== `${basedir}.ts`) {
-        console.error('will not be processed: ', fullPath);
         return;
       }
 
@@ -25,6 +25,7 @@ module.exports = (eleventyConfig) => {
           minify: true,
           bundle: true,
           write: false,
+          plugins: [glsl({minify: true})]
         });
 
         return output.outputFiles[0].text;
