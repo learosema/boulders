@@ -4,7 +4,6 @@ import { CanvasRenderer } from "./renderer/canvas-renderer";
 import { AnimationLoop } from "./utils/animation-interval";
 import { Level, LevelCallbackFunction } from "./utils/level";
 import { loadImage } from "./utils/load-image";
-import { throttle } from "./utils/throttle";
 
 export class BouldersGame extends HTMLElement {
 
