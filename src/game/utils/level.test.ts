@@ -1,4 +1,4 @@
-import { Direction, Field, Level } from "./level";
+import { Direction, Field, Flag, Level } from "./level";
 
 describe('Level class', () => {
 
@@ -149,8 +149,6 @@ describe('Level class', () => {
     expect(level.getField(3,1)).toEqual(Field.STONE);
   });
 
-
-
   it('should count up the collectedGems property when a gem is collected via move() and notify subscribers about it', () => {
     const level = Level.parse(`
       ####
@@ -186,31 +184,31 @@ describe('Level class', () => {
 
     level.stoneFall();
 
-    // there is one item currently in free fall
-    expect(level.fallingItems).toStrictEqual([{x:2, y:2}]);
-
+    // expect the stone to have moved one field down
     expect(level.getField(2, 1)).toEqual(Field.EMPTY);
     expect(level.getField(2, 2)).toEqual(Field.STONE);
+
+    // expect the stone to have the FALLING flag set
+    expect(level.getFlag(2,2)).toBe(Flag.FALLING);
   });
 
-  it('should notify subscribers when a stone stops falling down', () => {
+  it('should notify subscribers when a falling stone hits the ground', () => {
     const level = Level.parse(`
       ####
       #P #
       #.o#
       ####
     `);
-    level.fallingItems = [{x:2, y:2}];
+    level.setFlag(2, 2, Flag.FALLING);
     const spy = jest.fn();
     level.subscribe(spy);
 
     level.stoneFall();
 
-    // as the falling stone has hit the ground,
-    // fallingItems shozld be empty now
-    expect(level.fallingItems).toStrictEqual([]);
-
-    expect(spy).toHaveBeenCalledWith('ground', {x:2, y:2});
+    // as the falling stone has hit the ground
+    // the falling flag is expected to be cleared.
+    expect(level.getFlag(2,2)).toBe(Flag.NONE);
+    expect(spy).toHaveBeenCalledWith('ground', undefined);
   });
 
   it('should kill the player when a stone falls down on them', () => {
@@ -230,4 +228,51 @@ describe('Level class', () => {
     expect(level.playerAlive).toBe(false);
   });
 
+  it('should not kill the player when they move on a sand field under a stone', () => {
+    const level = Level.parse(`
+      ####
+      # o#
+      #P.#
+      ####
+    `);
+    const spy = jest.fn();
+    level.subscribe(spy);
+
+    level.move(1, 0);
+    level.stoneFall();
+
+    expect(level.playerAlive).toBe(true);
+  });
+
+  it('should move a stone to the right when there is a stone or gem below', () => {
+    const level = Level.parse(`
+      ######
+      #P o #
+      #  o #
+      ######
+    `);
+
+    level.stoneFall();
+    console.error(level.level);
+    expect(level.getField(3, 1)).toBe(Field.EMPTY);
+    expect(level.getField(4, 1)).toBe(Field.STONE);
+    expect(level.getFlag(3, 1)).toBe(Flag.NONE);
+    expect(level.getFlag(4, 1)).toBe(Flag.FALLING);
+  });
+
+  it('should move a stone to the left when there is a stone or gem below but the right side is blocked', () => {
+    const level = Level.parse(`
+      ######
+      #P o #
+      #  oo#
+      ######
+    `);
+
+    level.stoneFall();
+    expect(level.getField(3, 1)).toBe(Field.EMPTY);
+    expect(level.getField(2, 1)).toBe(Field.STONE);
+
+    expect(level.getFlag(3, 1)).toBe(Flag.NONE);
+    expect(level.getFlag(2, 1)).toBe(Flag.FALLING);
+  });
 });

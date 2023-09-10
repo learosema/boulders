@@ -4,6 +4,7 @@ export enum Flag {
   NONE = 0,
   FALLING = 1,
   EXIT = 2,
+  SKIP = 4,
 };
 
 export enum Field {
@@ -210,6 +211,10 @@ export class Level {
         const field = this.getField(x, y);
         const flag = this.getFlag(x, y);
         const below = this.getField(x, y + 1);
+        if ((flag & Flag.SKIP) > 0) {
+          this.setFlag(x, y, flag & (255 ^ Flag.SKIP));
+          continue;
+        }
         if (field !== Field.STONE && field !== Field.GEM) {
           continue;
         }
@@ -249,7 +254,7 @@ export class Level {
             this.setField(x + 1, y, field);
             this.setField(x, y, Field.EMPTY);
             this.setFlag(x, y, Flag.NONE);
-            this.setFlag(x + 1, y, Flag.FALLING);
+            this.setFlag(x + 1, y, Flag.FALLING | Flag.SKIP);
             continue;
           }
           const left = this.getField(x - 1, y);
