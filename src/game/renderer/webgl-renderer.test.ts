@@ -1,7 +1,7 @@
-import { Level } from '../utils/level';
-import { CanvasRenderer } from './canvas-renderer';
+import { Level } from "../utils/level";
+import { WebGLRenderer } from "./webgl-renderer";
 
-describe('Canvas Renderer', () => {
+describe('WebGL Renderer', () => {
   let canvas: HTMLCanvasElement, sprites: HTMLImageElement;
 
   beforeEach(() => {
@@ -14,21 +14,21 @@ describe('Canvas Renderer', () => {
   });
 
   it('should instantiate', () => {
-    expect(new CanvasRenderer(canvas, sprites)).toBeTruthy();
+    expect(new WebGLRenderer(canvas, sprites)).toBeTruthy();
   });
 
   it('should setup the 2D rendering context', async () => {
-    const renderer = new CanvasRenderer(canvas, sprites);
+    const renderer = new WebGLRenderer(canvas, sprites);
     await renderer.setup();
-    expect(renderer.context).toBeTruthy();
-    expect(renderer.context).toBeInstanceOf(CanvasRenderingContext2D);
+    expect(renderer.gl).toBeTruthy();
+    expect(renderer.gl).toBeInstanceOf(CanvasRenderingContext2D);
   });
 
   it('should render a level', async () => {
     canvas.width = 320;
     canvas.height = 200;
     window.devicePixelRatio = 1;
-    const renderer = new CanvasRenderer(canvas, sprites);
+    const renderer = new WebGLRenderer(canvas, sprites);
     await renderer.setup();
     const level = Level.parse(`
       ####

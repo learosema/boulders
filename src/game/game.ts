@@ -41,7 +41,6 @@ export class BouldersGame extends HTMLElement {
 
   async connectedCallback() {
     await this.setup();
-    console.log('connected');
   }
 
   disconnectedCallback() {
@@ -56,17 +55,34 @@ export class BouldersGame extends HTMLElement {
     if (! this.sprites) {
       throw new Error('sprites not loaded.');
     }
-    if (this.canvas) {
-      this.canvas.remove();
-      this.canvas = null;
-    }
-    this.canvas = document.createElement('canvas');
-    this.canvas.setAttribute('tabindex', '0');
-    this.appendChild(this.canvas);
-    this.renderer = new CanvasRenderer(this.canvas, this.sprites);
+    this.createCanvas();
+    this.renderer = new CanvasRenderer(this.canvas!, this.sprites);
     await this.renderer.setup();
     if (this.autofocus) {
       setTimeout(() => this.canvas?.focus(), 0);
+    }
+  }
+
+  private createCanvas(): void {
+    this.destroyCanvas();
+    this.canvas = document.createElement('canvas');
+    this.canvas.setAttribute('tabindex', '0');
+    this.appendChild(this.canvas);
+    if (! this.canvas) {
+      throw Error('Canvas creation failed.');
+    }
+    this.canvas.addEventListener('focus', this.onFocus, false);
+    this.canvas.addEventListener('blur', this.onBlur, false);
+    this.canvas.addEventListener('keydown', this.onKeyDown, false);
+  }
+
+  private destroyCanvas(): void {
+    if (this.canvas) {
+      this.canvas.removeEventListener('focus', this.onFocus, false);
+      this.canvas.removeEventListener('blur', this.onBlur, false);
+      this.canvas.removeEventListener('keydown', this.onKeyDown, false);
+      this.canvas.remove();
+      this.canvas = null;
     }
   }
 
@@ -79,7 +95,7 @@ export class BouldersGame extends HTMLElement {
       this.sprites = await loadImage('/gfx/sprites.png');
     }
     if (! this.renderer) {
-      this.createRenderer();
+      await this.createRenderer();
     }
     if (! this.level) {
       this.initializeLevel();
@@ -93,27 +109,19 @@ export class BouldersGame extends HTMLElement {
       this.animationLoop.add(this.renderLoop, 1000 / 25);
       this.animationLoop.add(this.inputLoop, 50);
       this.animationLoop.add(this.stoneLoop, 200);
-      this.level.subscribe(this.onGameEvent)
     }
+    this.level.subscribe(this.onGameEvent);
     this.initialized = true;
-    if (! this.canvas) {
-      throw Error('Canvas creation failed.');
-    }
 
-    this.canvas.addEventListener('focus', this.onFocus, false);
-    this.canvas.addEventListener('blur', this.onBlur, false);
-    this.canvas.addEventListener('keydown', this.onKeyDown, false);
     window.addEventListener('resize', this.onResize, false);
   }
 
   dispose() {
-    if (this.canvas) {
-      this.canvas.removeEventListener('focus', this.onFocus, false);
-      this.canvas.removeEventListener('blur', this.onBlur, false);
-      this.canvas.removeEventListener('keydown', this.onKeyDown, false);
-    }
-    this.renderer?.dispose();
     this.animationLoop?.dispose();
+    this.renderer?.dispose();
+    this.destroyCanvas();
+    this.level?.unsubscribe();
+    this.level = null;
     this.renderer = null;
     window.removeEventListener('resize', this.onResize, false);
   }
