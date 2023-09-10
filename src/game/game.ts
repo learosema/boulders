@@ -1,6 +1,7 @@
 import { FreqMod, createFilter } from "./audio/FreqMod";
 import { IRenderer } from "./interfaces/irenderer";
 import { CanvasRenderer } from "./renderer/canvas-renderer";
+import { SupportedEngines, rendererFactory } from "./renderer/engines";
 import { AnimationLoop } from "./utils/animation-interval";
 import { Level, LevelCallbackFunction } from "./utils/level";
 import { loadImage } from "./utils/load-image";
@@ -25,7 +26,7 @@ export class BouldersGame extends HTMLElement {
     super();
   }
 
-  static observedAttributes = ['autofocus'];
+  static observedAttributes = ['autofocus', 'engine'];
 
   static register() {
     customElements.define('boulders-game', BouldersGame);
@@ -35,6 +36,17 @@ export class BouldersGame extends HTMLElement {
 
   get autofocus(): boolean {
     return this.hasAttribute('autofocus');
+  }
+
+  get engine(): SupportedEngines {
+    const engine = this.getAttribute('engine');
+    if (! engine) {
+      return 'canvas2d';
+    }
+    if (engine !== 'canvas2d' && engine !== 'webgl' && engine !== 'noop') {
+      throw new Error('Unsupported Engine');
+    }
+    return engine;
   }
 
   /* lifecycle callbacks */
@@ -47,16 +59,29 @@ export class BouldersGame extends HTMLElement {
     this.dispose();
   }
 
+  async attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    console.log(name, oldValue, newValue);
+    if (name === 'engine') {
+      this.createRenderer();
+    }
+  }
+
+  /* private methods */
+
   private initializeLevel() {
     this.level = Level.parse(this.querySelector('script')?.textContent || '');
   }
 
   private async createRenderer()  {
     if (! this.sprites) {
-      throw new Error('sprites not loaded.');
+      this.sprites = await loadImage('/gfx/sprites.png');
     }
     this.createCanvas();
-    this.renderer = new CanvasRenderer(this.canvas!, this.sprites);
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer = null;
+    }
+    this.renderer = rendererFactory(this.engine, this.canvas!, this.sprites);
     await this.renderer.setup();
     if (this.autofocus) {
       setTimeout(() => this.canvas?.focus(), 0);
@@ -91,9 +116,6 @@ export class BouldersGame extends HTMLElement {
 
     this.mainGain.gain.value = .25;
     this.mainGain.connect(this.audioContext.destination);
-    if (! this.sprites) {
-      this.sprites = await loadImage('/gfx/sprites.png');
-    }
     if (! this.renderer) {
       await this.createRenderer();
     }
@@ -111,9 +133,8 @@ export class BouldersGame extends HTMLElement {
       this.animationLoop.add(this.stoneLoop, 200);
     }
     this.level.subscribe(this.onGameEvent);
-    this.initialized = true;
-
     window.addEventListener('resize', this.onResize, false);
+    this.initialized = true;
   }
 
   dispose() {
@@ -124,6 +145,7 @@ export class BouldersGame extends HTMLElement {
     this.level = null;
     this.renderer = null;
     window.removeEventListener('resize', this.onResize, false);
+    this.initialized = false;
   }
 
   onGameEvent: LevelCallbackFunction = (eventName: string) => {
