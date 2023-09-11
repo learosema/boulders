@@ -67,17 +67,22 @@ export class WebGLRenderer implements IRenderer {
   }
 
   setSize() {
+    const { gl, canvas } = this;
+    if (! gl || !canvas) {
+      throw new Error('Canvas not initialized.');
+    }
     this.pixelRatio = pixelRatio();
     this.dimensions = {
       width: this.canvas.clientWidth * this.pixelRatio,
       height: this.canvas.clientHeight * this.pixelRatio,
     };
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
     // display at least 10x10 tiles on screen.
     this.tileSize = Math.min(64, Math.round(viewportMin / 10));
 
-    Object.assign(this.canvas, this.dimensions);
+    Object.assign(canvas, this.dimensions);
   }
 
   dispose() {}
