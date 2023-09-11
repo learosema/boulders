@@ -83,6 +83,10 @@ export class BouldersGame extends HTMLElement {
     }
     this.renderer = rendererFactory(this.engine, this.canvas!, this.sprites);
     await this.renderer.setup();
+    if (this.level) {
+      this.renderer.setSize();
+      this.renderer.frame(this.level);
+    }
     if (this.autofocus) {
       setTimeout(() => this.canvas?.focus(), 0);
     }
@@ -99,10 +103,12 @@ export class BouldersGame extends HTMLElement {
     this.canvas.addEventListener('focus', this.onFocus, false);
     this.canvas.addEventListener('blur', this.onBlur, false);
     this.canvas.addEventListener('keydown', this.onKeyDown, false);
+    window.addEventListener('resize', this.onResize, false);
   }
 
   private destroyCanvas(): void {
     if (this.canvas) {
+      window.removeEventListener('resize', this.onResize, false);
       this.canvas.removeEventListener('focus', this.onFocus, false);
       this.canvas.removeEventListener('blur', this.onBlur, false);
       this.canvas.removeEventListener('keydown', this.onKeyDown, false);
@@ -116,16 +122,15 @@ export class BouldersGame extends HTMLElement {
 
     this.mainGain.gain.value = .25;
     this.mainGain.connect(this.audioContext.destination);
-    if (! this.renderer) {
-      await this.createRenderer();
-    }
     if (! this.level) {
       this.initializeLevel();
     }
-    if (! this.level ||  ! this.renderer) {
-      throw Error('Something went wrong');
+    if (! this.level) {
+      throw Error('Level initialization failed.');
     }
-    this.renderer.frame(this.level);
+    if (! this.renderer) {
+      await this.createRenderer();
+    }
     if (! this.animationLoop) {
       this.animationLoop = new AnimationLoop();
       this.animationLoop.add(this.renderLoop, 1000 / 25);
@@ -133,7 +138,7 @@ export class BouldersGame extends HTMLElement {
       this.animationLoop.add(this.stoneLoop, 200);
     }
     this.level.subscribe(this.onGameEvent);
-    window.addEventListener('resize', this.onResize, false);
+
     this.initialized = true;
   }
 
@@ -144,7 +149,6 @@ export class BouldersGame extends HTMLElement {
     this.level?.unsubscribe();
     this.level = null;
     this.renderer = null;
-    window.removeEventListener('resize', this.onResize, false);
     this.initialized = false;
   }
 
@@ -205,24 +209,26 @@ export class BouldersGame extends HTMLElement {
   }
 
   onResize = () => {
-    this.renderer?.setSize();
+    if (!this.renderer) {
+      return;
+    }
+
+    this.renderer.setSize();
     if (this.level) {
-      this.renderer?.frame(this.level);
+      this.renderer.frame(this.level);
     }
   }
 
   renderLoop = (t: DOMHighResTimeStamp) => {
-    if (!this.level) {
+    if (!this.level || !this.renderer) {
       return;
     }
-    if (this.level) {
-      this.renderer?.frame(this.level);
-    }
+    this.renderer.frame(this.level);
   }
 
   stoneLoop = () => {
     if (this.level) {
-      this.level?.stoneFall();
+      this.level.stoneFall();
       this.renderer?.frame(this.level!);
     }
   }

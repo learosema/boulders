@@ -39,7 +39,6 @@ export class CanvasRenderer implements IRenderer {
     if (! this.context) {
       throw new Error('Context failed to initialize');
     }
-    this.setSize();
   }
 
   setSize() {
