@@ -63,7 +63,10 @@ export class WebGLRenderer implements IRenderer {
 
   frame(_level: Level, _levelPosition?: Position | undefined, _offset?: Position | undefined): void {
     const { gl } = this;
-    gl?.drawArrays(WebGLRenderingContext.TRIANGLES, 0, 6);
+    if (! gl) {
+      return;
+    }
+    gl.drawArrays(WebGLRenderingContext.TRIANGLES, 0, 6);
   }
 
   setSize() {
@@ -72,17 +75,18 @@ export class WebGLRenderer implements IRenderer {
       throw new Error('Canvas not initialized.');
     }
     this.pixelRatio = pixelRatio();
+    const width = this.canvas.clientWidth * this.pixelRatio;
+    const height = this.canvas.clientHeight * this.pixelRatio;
     this.dimensions = {
-      width: this.canvas.clientWidth * this.pixelRatio,
-      height: this.canvas.clientHeight * this.pixelRatio,
+      width,
+      height,
     };
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    Object.assign(canvas, this.dimensions);
+    gl.viewport(0, 0, width, height);
     const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
     // display at least 10x10 tiles on screen.
     this.tileSize = Math.min(64, Math.round(viewportMin / 10));
-
-    Object.assign(canvas, this.dimensions);
   }
 
   dispose() {}
