@@ -17,11 +17,11 @@ describe('WebGL Renderer', () => {
     expect(new WebGLRenderer(canvas, sprites)).toBeTruthy();
   });
 
-  it('should setup the 2D rendering context', async () => {
+  it('should setup the WebGL Rendering Context', async () => {
     const renderer = new WebGLRenderer(canvas, sprites);
     await renderer.setup();
     expect(renderer.gl).toBeTruthy();
-    expect(renderer.gl).toBeInstanceOf(CanvasRenderingContext2D);
+    expect(renderer.gl).toBeInstanceOf(WebGLRenderingContext);
   });
 
   it('should render a level', async () => {
