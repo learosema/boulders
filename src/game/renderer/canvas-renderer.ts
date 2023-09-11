@@ -72,9 +72,9 @@ export class CanvasRenderer implements IRenderer {
     // number of tiles that fit into the screen
     const { width, height } = this.dimensions;
     const { tileSize, pixelRatio, spriteSize } = this;
-    // TODO needs a little more brain acrobatics
-    const numTilesX = oddly(1 + Math.floor(width / (tileSize * pixelRatio)));
-    const numTilesY = oddly(1 + Math.floor(height / (tileSize * pixelRatio)));
+
+    let numTilesX = oddly(1 + Math.round(width / (tileSize * pixelRatio)));
+    let numTilesY = oddly(1 + Math.round(height / (tileSize * pixelRatio)));
 
     if (! offset) {
       offset = {
