@@ -73,8 +73,8 @@ export class CanvasRenderer implements IRenderer {
     const { width, height } = this.dimensions;
     const { tileSize, pixelRatio, spriteSize } = this;
 
-    let numTilesX = oddly(1 + Math.round(width / (tileSize * pixelRatio)));
-    let numTilesY = oddly(1 + Math.round(height / (tileSize * pixelRatio)));
+    const numTilesX = oddly(1 + Math.round(width / (tileSize * pixelRatio)));
+    const numTilesY = oddly(1 + Math.round(height / (tileSize * pixelRatio)));
 
     if (! offset) {
       offset = {
