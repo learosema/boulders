@@ -182,6 +182,13 @@ export class BouldersGame extends HTMLElement {
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
+    if (e.code === 'Escape') {
+      const gameMenu: HTMLDialogElement = document.getElementById('gameMenu') as HTMLDialogElement;
+      window.setTimeout(() => gameMenu.showModal(), 0);
+    }
+    if (!this.level?.playerAlive) {
+      return;
+    }
     if (e.code === 'ArrowUp' || e.code === 'KeyW') {
       this.inputQueue.push('up');
     }
@@ -194,10 +201,7 @@ export class BouldersGame extends HTMLElement {
     if (e.code === 'ArrowRight' || e.code === 'KeyD') {
       this.inputQueue.push('right');
     }
-    if (e.code === 'Escape') {
-      const gameMenu: HTMLDialogElement = document.getElementById('gameMenu') as HTMLDialogElement;
-      window.setTimeout(() => gameMenu.showModal(), 0);
-    }
+
   };
 
   onFocus = () => {
@@ -236,7 +240,7 @@ export class BouldersGame extends HTMLElement {
   inputLoop = () => {
     const code = this.inputQueue.pop();
     const { level } = this;
-    if (! level) {
+    if (! level || !level.playerAlive) {
       return;
     }
     if (code === 'up') {
