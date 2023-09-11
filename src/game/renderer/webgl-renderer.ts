@@ -7,12 +7,17 @@ import vertexShader from './webgl-shaders/vert.glsl';
 import fragmentShader from './webgl-shaders/frag.glsl';
 import { createProgram } from "../utils/webgl/shader";
 import { pixelRatio } from "../utils/pixel-ratio";
+import { oddly } from "../utils/num-utils";
 
 export class WebGLRenderer implements IRenderer {
 
   readonly geometry: BufferGeometry = {
     position: {
       data: new Float32Array([-1, -1, -1, 1, 1, -1, 1, -1, 1, 1, -1, 1]),
+      recordSize: 2,
+    },
+    uv: {
+      data: new Float32Array([ 0,  1,  0, 0, 1,  1, 1,  1, 1, 0,  0, 0]),
       recordSize: 2,
     }
   };
@@ -23,7 +28,7 @@ export class WebGLRenderer implements IRenderer {
    * tiles on the spritesheet are 16x16 pixels
    */
   get spriteSize() {
-    return this.sprites.height;
+    return [this.sprites.width, this.sprites.height];
   };
 
   /**
@@ -40,8 +45,17 @@ export class WebGLRenderer implements IRenderer {
 
   spriteTexture: Texture|null = null;
 
+  levelTexture: Texture|null = null;
+
   gl: WebGLRenderingContext|null = null;
   program: WebGLProgram|null = null;
+  levelImageData: ImageData|null = null;
+
+  uniforms: Record<string, any> = {
+    resolution: [400, 300],
+    numTiles: [3, 3],
+    time: 0,
+  }
 
   constructor(
     public canvas: HTMLCanvasElement,
@@ -54,6 +68,7 @@ export class WebGLRenderer implements IRenderer {
       throw new Error('webgl initialization failed.');
     }
     this.spriteTexture = new Texture(this.sprites);
+    this.uniforms.spriteTexture = this.spriteTexture;
     this.spriteTexture.upload(this.gl, 0);
     this.createBuffers();
     this.program = createProgram(this.gl, vertexShader, fragmentShader);
@@ -61,11 +76,44 @@ export class WebGLRenderer implements IRenderer {
     this.enableBuffers();
   }
 
-  frame(_level: Level, _levelPosition?: Position | undefined, _offset?: Position | undefined): void {
+  frame(level: Level, levelPosition?: Position | undefined, offset?: Position | undefined): void {
     const { gl } = this;
-    if (! gl) {
+    if (! gl || !level) {
       return;
     }
+
+    // number of tiles that fit into the screen
+    const { width, height } = this.dimensions;
+    const { tileSize, pixelRatio, spriteSize } = this;
+
+    const numTilesX = oddly(1 + Math.round(width / (tileSize * pixelRatio)));
+    const numTilesY = oddly(1 + Math.round(height / (tileSize * pixelRatio)));
+
+    if (! offset) {
+      offset = {
+        x: -tileSize/2,
+        y: -tileSize/2,
+      };
+    }
+
+    const { playerPosition } = level;
+    if (! levelPosition) {
+      levelPosition = {
+        x: (playerPosition?.x || 0) - Math.floor(numTilesX/2),
+        y: (playerPosition?.y || 0) - Math.floor(numTilesY/2),
+      }
+    }
+
+    this.setLevelTexture(level);
+    this.uniforms.levelPosition = [levelPosition?.x, levelPosition?.y];
+    this.uniforms.offset = [offset?.x * pixelRatio, offset?.y * pixelRatio];
+    this.uniforms.numTiles = [numTilesX, numTilesY];
+    this.uniforms.tileSize = tileSize * pixelRatio;
+    this.uniforms.resolution = [width, height];
+    this.uniforms.levelSize = [level.dimensions.width, level.dimensions.height];
+    this.uniforms.spriteSize = spriteSize;
+    this.uniforms.time = performance.now();
+    this.setUniforms();
     gl.drawArrays(WebGLRenderingContext.TRIANGLES, 0, 6);
   }
 
@@ -120,5 +168,55 @@ export class WebGLRenderer implements IRenderer {
     }
   }
 
+  private setLevelTexture(level: Level): void {
+    if (!this.gl) {
+      throw new Error('context not initialized');
+    }
+    const sizeChanged = !this.levelImageData ||
+      this.levelImageData.width !== level.dimensions.width ||
+      this.levelImageData.height !== level.dimensions.height;
+
+    if (!this.levelImageData || sizeChanged) {
+      this.levelImageData = new ImageData(level.dimensions.width, level.dimensions.height);
+    }
+    for (let y = 0; y < level.dimensions.height; y++) {
+      for (let x = 0; x < level.dimensions.width; x++) {
+        this.levelImageData.data[(y * level.dimensions.width + x) * 4] = level.getField(x, y);
+      }
+    }
+    if (!this.levelTexture || sizeChanged) {
+      if (this.levelTexture) {
+        this.levelTexture.dispose();
+      }
+      this.levelTexture = new Texture(this.levelImageData);
+      this.levelTexture.upload(this.gl, 1);
+    } else {
+      this.levelTexture.update();
+    }
+    this.uniforms.levelTexture = this.levelTexture;
+  }
+
+  private setUniforms(): void {
+    const { gl, program } = this;
+    if (!gl || !program) {
+      throw new Error('context not initialized');
+    }
+
+    for (const [key, val] of Object.entries(this.uniforms)) {
+      const loc = gl.getUniformLocation(program, key);
+      if (typeof val === 'number') {
+        gl.uniform1f(loc, val);
+      }
+      if (val instanceof Texture) {
+        gl.uniform1i(loc, (val as Texture).textureIndex);
+      }
+      if (val instanceof Array && val.length === 2) {
+        gl.uniform2fv(loc, val);
+      }
+      if (val instanceof Array && val.length === 3) {
+        gl.uniform3fv(loc, val);
+      }
+    }
+  }
 
 }
