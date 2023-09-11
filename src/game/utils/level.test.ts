@@ -253,7 +253,7 @@ describe('Level class', () => {
     `);
 
     level.stoneFall();
-    console.error(level.level);
+
     expect(level.getField(3, 1)).toBe(Field.EMPTY);
     expect(level.getField(4, 1)).toBe(Field.STONE);
     expect(level.getFlag(3, 1)).toBe(Flag.NONE);
