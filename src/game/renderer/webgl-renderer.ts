@@ -7,7 +7,7 @@ import vertexShader from './webgl-shaders/vert.glsl';
 import fragmentShader from './webgl-shaders/frag.glsl';
 import { createProgram } from "../utils/webgl/shader";
 import { pixelRatio } from "../utils/pixel-ratio";
-import { oddly } from "../utils/num-utils";
+import { clamp, oddly } from "../utils/num-utils";
 
 export class WebGLRenderer implements IRenderer {
 
@@ -133,8 +133,9 @@ export class WebGLRenderer implements IRenderer {
     gl.viewport(0, 0, width, height);
     const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
-    // display at least 10x10 tiles on screen.
-    this.tileSize = Math.min(64, Math.round(viewportMin / 10));
+    // try to display at least 10x10 tiles on screen, show more on desktops, don't shrink sprites below 16x16
+    // and please let's use integer pixels.
+    this.tileSize = Math.floor(clamp(Math.round(viewportMin / 10), 16, 64));
   }
 
   dispose() {}
