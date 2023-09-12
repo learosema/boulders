@@ -3,6 +3,7 @@ const plugins = require('./plugins');
 module.exports = (eleventyConfig) => {
   // custom watch targets
   eleventyConfig.addWatchTarget('./src/assets');
+  eleventyConfig.addWatchTarget('./src/game');
 
   eleventyConfig.addPlugin(plugins);
 
