@@ -1,11 +1,14 @@
 precision highp float;
 
+#define NUM_SPRITES 8
+
 uniform vec2 resolution;
 uniform vec2 spriteSize;
 uniform vec2 levelSize;
-uniform vec2 numTiles;
 uniform vec2 offset;
 uniform vec2 levelPosition;
+uniform vec2 playerPosition;
+uniform float playerDirection;
 uniform float tileSize;
 
 uniform sampler2D levelTexture;
@@ -30,10 +33,22 @@ void main() {
   int tile = getField(XY + levelPosition);
   vec4 sprite = vec4(0., 0., 0., 1.);
   if (tile > 0) {
-    vec2 spriteOffset = vec2((xy.x + float(tile - 1)) * 1. / 8., xy.y);
-
+    vec2 spriteOffset = vec2((xy.x + float(tile - 1)) * 1. / float(NUM_SPRITES), xy.y);
     sprite = texture2D(spriteTexture, spriteOffset);
   }
   
-  gl_FragColor = sprite;
+  vec4 color = sprite;
+
+  // draw Player
+  // TODO: can be optimized via step function.
+  vec2 absPlayerPos = offset + (playerPosition - levelPosition) * tileSize;
+  if (pos.x > absPlayerPos.x &&
+      pos.x <  absPlayerPos.x + tileSize && 
+      pos.y > absPlayerPos.y && pos.y < absPlayerPos.y + tileSize) {
+    vec2 normalizedPos = (pos - absPlayerPos) / tileSize;
+    vec2 playerSpriteOffset = vec2((normalizedPos.x + 7. - playerDirection) / float(NUM_SPRITES), normalizedPos.y);
+    color = texture2D(spriteTexture, playerSpriteOffset);
+  }
+
+  gl_FragColor = color;
 }
