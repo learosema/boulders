@@ -5,6 +5,8 @@ const esbuild = require('esbuild');
 const { glsl } = require('esbuild-plugin-glsl');
 const path = require('path');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 module.exports = (eleventyConfig) => {
   eleventyConfig.addTemplateFormats('ts');
 
@@ -22,10 +24,11 @@ module.exports = (eleventyConfig) => {
         let output = await esbuild.build({
           target: 'es2020',
           entryPoints: [fullPath],
-          minify: true,
+          minify: isProduction,
           bundle: true,
           write: false,
-          plugins: [glsl({minify: true})]
+          sourcemap: !isProduction,
+          plugins: [glsl({minify: isProduction})]
         });
 
         return output.outputFiles[0].text;

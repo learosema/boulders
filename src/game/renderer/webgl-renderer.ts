@@ -1,6 +1,6 @@
 import { IDisposable } from "../interfaces/idisposable";
 import { IRenderer } from "../interfaces/irenderer";
-import { Level, Position } from "../utils/level";
+import { Direction, Level, Position } from "../utils/level";
 import { BufferGeometry } from "../utils/webgl/buffer-geometry";
 import { TextureFilter, Texture } from "../utils/webgl/texture";
 import vertexShader from './webgl-shaders/vert.glsl';
@@ -51,11 +51,7 @@ export class WebGLRenderer implements IRenderer {
   program: WebGLProgram|null = null;
   levelImageData: ImageData|null = null;
 
-  uniforms: Record<string, any> = {
-    resolution: [400, 300],
-    numTiles: [3, 3],
-    time: 0,
-  }
+  uniforms: Record<string, any> = {}
 
   constructor(
     public canvas: HTMLCanvasElement,
@@ -105,13 +101,16 @@ export class WebGLRenderer implements IRenderer {
     }
 
     this.setLevelTexture(level);
-    this.uniforms.levelPosition = [levelPosition?.x, levelPosition?.y];
+    this.uniforms.levelPosition = [levelPosition.x, levelPosition.y];
     this.uniforms.offset = [offset?.x * pixelRatio, offset?.y * pixelRatio];
     this.uniforms.numTiles = [numTilesX, numTilesY];
     this.uniforms.tileSize = tileSize * pixelRatio;
     this.uniforms.resolution = [width, height];
     this.uniforms.levelSize = [level.dimensions.width, level.dimensions.height];
     this.uniforms.spriteSize = spriteSize;
+    this.uniforms.playerAlive = level.playerAlive;
+    this.uniforms.playerPosition = [playerPosition?.x || 0, playerPosition?.y || 0];
+    this.uniforms.playerDirection = level.playerDirection === Direction.RIGHT ? 1 : 0;
     this.uniforms.time = performance.now();
     this.setUniforms();
     gl.drawArrays(WebGLRenderingContext.TRIANGLES, 0, 6);
@@ -205,7 +204,14 @@ export class WebGLRenderer implements IRenderer {
 
     for (const [key, val] of Object.entries(this.uniforms)) {
       const loc = gl.getUniformLocation(program, key);
+      if (typeof val === 'boolean') {
+        gl.uniform1i(loc, val ? 1 : 0);
+      }
       if (typeof val === 'number') {
+        if (key.startsWith('int')) {
+          gl.uniform1i(loc, val);
+          continue;
+        }
         gl.uniform1f(loc, val);
       }
       if (val instanceof Texture) {
