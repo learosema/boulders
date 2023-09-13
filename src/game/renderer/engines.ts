@@ -2,6 +2,7 @@ import { IRenderer } from "../interfaces/irenderer";
 import { CanvasRenderer } from "./canvas-renderer";
 import { WebGLRenderer } from "./webgl-renderer";
 import { NoOpRenderer } from "./noop-renderer";
+import { WebGPURenderer } from "./webgpu-renderer";
 
 
 export type SupportedEngines = 'canvas2d' | 'webgl' | 'noop';
@@ -15,6 +16,9 @@ export function rendererFactory(
   canvas: HTMLCanvasElement,
   sprites: HTMLImageElement,
 ): IRenderer {
+  if (type === 'webgpu') {
+    return new WebGPURenderer(canvas, sprites);
+  }
   if (type === 'webgl') {
     return new WebGLRenderer(canvas, sprites);
   }
