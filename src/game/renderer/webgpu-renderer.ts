@@ -16,21 +16,23 @@ export class WebGPURenderer implements IRenderer {
     }
   };
 
+  // to prevent shader errors make sure keys are sorted
   uniforms = {
     levelPosition: [0,0],
-    offset: [0,0],
-    numTiles: [0,0],
-    tileSize: 0,
-    resolution: [0,0],
     levelSize: [0,0],
-    playerAlive: false,
-    playerPosition: [0, 0],
+    numTiles: [0,0],
+    offset: [0,0],
+    playerAlive: 0,
     playerDirection: 0,
+    playerPosition: [0, 0],
+    resolution: [0,0],
     spriteSize: [0,0],
+    tileSize: 0,
     time: 0,
   }
 
-  uniformBuffer: Float32Array|null = null;
+  uniformValues: Float32Array|null = null;
+  uniformBuffer: GPUBuffer|null = null;
   uniformOffsets: Record<string, number> = {};
 
   adapter: GPUAdapter|null = null;
@@ -98,14 +100,45 @@ export class WebGPURenderer implements IRenderer {
   }
 
 
-  private setUniforms(): void {
-    let offset = 0;
-    let size = 0;
-    for (const [key, val] of Object.entries(this.uniforms)) {
-      if (val instanceof Array) {
-        size += 4 * val.length;
-      }
+  private initUniforms(): void {
+    const { device } = this;
+    if (! device) {
+      throw new Error('no device')
     }
+    let size = 0;
+    const sortedKeys = Object.keys(this.uniforms).sort();
+    for (const [key, val] of Object.entries(this.uniforms)) {
+      const itemSize = (val instanceof Array) ? val.length : 1;
+      this.uniformOffsets[key] = size;
+      size += itemSize;
+    }
+    this.uniformValues = new Float32Array(size);
+    this.uniformBuffer = device.createBuffer({
+      size: size * 4,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+    this.setUniforms();
   }
+
+  private setUniforms(): void {
+    const { device } = this;
+    if (! device) {
+      throw new Error('no device')
+    }
+    if (! this.uniformBuffer || !this.uniformValues || !this.uniformOffsets) {
+      throw new Error('call initUniforms first');
+    }
+    for (const [key, val] of Object.entries(this.uniforms)) {
+      const offset = this.uniformOffsets[key];
+      if (typeof offset === 'undefined') {
+        continue;
+      }
+      this.uniformValues.set(val instanceof Array ? val: [val], offset);
+    }
+    // copy the values from JavaScript to the GPU
+    device.queue.writeBuffer(this.uniformBuffer, 0, this.uniformValues);
+  }
+
+
 
 }
