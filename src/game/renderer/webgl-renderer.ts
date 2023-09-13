@@ -137,7 +137,15 @@ export class WebGLRenderer implements IRenderer {
     this.tileSize = Math.floor(clamp(Math.round(viewportMin / 10), 16, 64));
   }
 
-  dispose() {}
+  dispose() {
+    this.uniforms = {};
+    this.spriteTexture?.dispose();
+    this.levelTexture?.dispose();
+    this.spriteTexture = null;
+    this.levelTexture = null;
+    this.levelImageData = null;
+    this.deleteBuffers();
+  }
 
   private createBuffers() {
     if (! this.gl) {
@@ -165,6 +173,20 @@ export class WebGLRenderer implements IRenderer {
       gl.enableVertexAttribArray(attrib.location);
       gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer[name]);
       gl.vertexAttribPointer(attrib.location, attrib.recordSize, gl.FLOAT, false, 0, 0);
+    }
+  }
+
+  private deleteBuffers() {
+    if (! this.gl) {
+      return;
+    }
+    const { gl } = this;
+    for (const [name, attrib] of Object.entries(this.geometry)) {
+      if (typeof attrib.location !== 'undefined') {
+        gl.disableVertexAttribArray(attrib.location);
+      }
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.deleteBuffer(this.buffer[name]);
     }
   }
 

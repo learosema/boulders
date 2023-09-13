@@ -124,6 +124,8 @@ export class Texture {
   dispose(): void {
     if (this.texture && this.gl) {
       this.gl.deleteTexture(this.texture);
+      this.gl.activeTexture(this.gl.TEXTURE0 + this.textureIndex);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, null);
       this.texture = null;
       this.gl = null;
     }
