@@ -42,6 +42,9 @@ export class WebGPURenderer implements IRenderer {
   sampler: GPUSampler|null = null;
 
   context: GPUCanvasContext|null = null;
+  levelArray: Uint32Array|null = null;
+  vertexBufferLayout: GPUVertexBufferLayout[] = [];
+  levelStorage: GPUBuffer|null = null;
 
   constructor(
     public canvas: HTMLCanvasElement,
@@ -62,7 +65,7 @@ export class WebGPURenderer implements IRenderer {
       device: this.device,
       format: navigator.gpu.getPreferredCanvasFormat(),
     });
-    this.createBuffers();
+    this.createVertexBuffers();
     this.spriteTexture = await textureFromImg(this.device, this.sprites);
     this.sampler = this.device.createSampler({
       minFilter: 'nearest',
@@ -82,11 +85,12 @@ export class WebGPURenderer implements IRenderer {
 
   }
 
-  private createBuffers(): void {
+  private createVertexBuffers(): void {
     const { device } = this;
     if(!device) {
       throw Error('no device');
     }
+    this.vertexBufferLayout = [];
     for (const [key, val] of Object.entries(this.geometry)) {
       const vertexBuffer = device.createBuffer({
         label: key,
@@ -96,9 +100,52 @@ export class WebGPURenderer implements IRenderer {
 
       device.queue.writeBuffer(vertexBuffer, /*bufferOffset=*/0, val.data);
       this.buffers[key] = vertexBuffer;
+      const recordSize = val.recordSize;
+      const format = recordSize === 2 ? 'float32x2' :
+        recordSize === 3 ? 'float32x3' : 'float32x4';
+      const shaderLocation = this.vertexBufferLayout.length;
+      this.vertexBufferLayout.push({
+        arrayStride: 4 * recordSize,
+        attributes: [{
+          format,
+          offset: 0,
+          shaderLocation, // Position, see vertex shader
+        }],
+      });
     }
   }
 
+  private createStorageBuffer(level: Level) {
+    const { device } = this;
+    if (! device) {
+      throw new Error('no device')
+    }
+    this.levelArray = new Uint32Array(
+      level.dimensions.width *
+      level.dimensions.height);
+    this.levelStorage = device.createBuffer({
+      label: "Level Data",
+      size: this.levelArray.byteLength,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+    })
+  }
+
+  private setStorageBuffer(level: Level) {
+    const { device } = this;
+    if (! device) {
+      throw new Error('no device')
+    }
+    const levelFlat = level.level.flat();
+    if (!this.levelArray || !this.levelStorage ||
+      !(this.levelArray.length !== levelFlat.length)) {
+      this.createStorageBuffer(level);
+    }
+    if (!this.levelArray || !this.levelStorage) {
+      throw new Error('storage initialization failed');
+    }
+    this.levelArray.set(levelFlat);
+    device.queue.writeBuffer(this.levelStorage, 0, this.levelArray);
+  }
 
   private initUniforms(): void {
     const { device } = this;
@@ -139,6 +186,31 @@ export class WebGPURenderer implements IRenderer {
     device.queue.writeBuffer(this.uniformBuffer, 0, this.uniformValues);
   }
 
+  private createPipeline() {
+    const { device } = this;
+    if (! device) {
+      throw new Error('no device')
+    }/*
+    device.createRenderPipeline({
+      label: "Cell pipeline",
+      layout: "auto",
+      vertex: {
+        module: cellShaderModule,
+        entryPoint: "vertexMain",
+        buffers: [vertexBufferLayout]
+      },
+      fragment: {
+        module: cellShaderModule,
+        entryPoint: "fragmentMain",
+        targets: [{
+          format: canvasFormat
+        }]
+      }
+    })*/
+  }
 
+  private createShaders() {
+
+  }
 
 }
