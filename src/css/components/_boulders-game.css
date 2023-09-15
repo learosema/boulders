@@ -23,6 +23,7 @@ boulders-game {
   }
 
   > canvas {
+    -webkit-tap-highlight-color: transparent;
     display: block;
     top: 0;
     left: 0;
@@ -33,6 +34,10 @@ boulders-game {
 
     &:focus {
       outline: none;
+    }
+
+    &:active {
+      -webkit-tap-highlight-color: transparent;
     }
 
     &:not(:focus) {
