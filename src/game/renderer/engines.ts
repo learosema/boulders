@@ -6,7 +6,7 @@ import { WebGPURenderer } from "./webgpu-renderer";
 import { Level } from "../utils/level";
 
 
-export type SupportedEngines = 'canvas2d' | 'webgl' | 'noop';
+export type SupportedEngines = 'webgpu' | 'canvas2d' | 'webgl' | 'noop';
 
 export function rendererFactory(
   type: SupportedEngines,

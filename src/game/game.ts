@@ -10,7 +10,7 @@ export class BouldersGame extends HTMLElement {
 
   canvas: HTMLCanvasElement | null = null;
   renderer: IRenderer | null = null;
-  level: Level | null = null;
+  level: Level;
   timer = NaN;
   initialized = false;
   sprites: HTMLImageElement|null = null;
@@ -24,6 +24,7 @@ export class BouldersGame extends HTMLElement {
 
   constructor() {
     super();
+    this.level = Level.parse(this.querySelector('script')?.textContent || '');
   }
 
   static observedAttributes = ['autofocus', 'engine'];
@@ -43,7 +44,7 @@ export class BouldersGame extends HTMLElement {
     if (! engine) {
       return 'canvas2d';
     }
-    if (engine !== 'canvas2d' && engine !== 'webgl' && engine !== 'noop') {
+    if (engine !== 'webgpu' && engine !== 'canvas2d' && engine !== 'webgl' && engine !== 'noop') {
       throw new Error('Unsupported Engine');
     }
     return engine;
@@ -67,10 +68,6 @@ export class BouldersGame extends HTMLElement {
   }
 
   /* private methods */
-
-  private initializeLevel() {
-    this.level = Level.parse(this.querySelector('script')?.textContent || '');
-  }
 
   private async createRenderer()  {
     if (!this.level) {
@@ -125,12 +122,6 @@ export class BouldersGame extends HTMLElement {
 
     this.mainGain.gain.value = .25;
     this.mainGain.connect(this.audioContext.destination);
-    if (! this.level) {
-      this.initializeLevel();
-    }
-    if (! this.level) {
-      throw Error('Level initialization failed.');
-    }
     if (! this.renderer) {
       await this.createRenderer();
     }
@@ -150,7 +141,6 @@ export class BouldersGame extends HTMLElement {
     this.renderer?.dispose();
     this.destroyCanvas();
     this.level?.unsubscribe();
-    this.level = null;
     this.renderer = null;
     this.initialized = false;
   }
