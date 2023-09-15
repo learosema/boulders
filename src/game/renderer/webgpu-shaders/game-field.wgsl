@@ -48,6 +48,6 @@ fn getField(field: vec2i) -> u32 {
 fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
   let uv = input.uv;
 
-  let color = textureSample(spriteTexture, spriteSampler, uv); 
+  // let color = textureSample(spriteTexture, spriteSampler, uv); 
   return vec4f(uv.x, uv.y, 1, 1);
 }
