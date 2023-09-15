@@ -197,12 +197,38 @@ export class BouldersGame extends HTMLElement {
 
   };
 
+  onPointerDown = (e: PointerEvent) => {
+    const thirdX = this.clientWidth / 3;
+    const thirdY = this.clientHeight / 3;
+    const [X, Y] = [(e.clientX / thirdX)|0, (e.clientY / thirdY)|0];
+
+    if (!this.level.playerAlive) {
+      return;
+    }
+    if (X === 1 && Y === 0) {
+      this.inputQueue.push('up');
+    }
+    if (X === 0 && Y === 1) {
+      this.inputQueue.push('left');
+    }
+    if (X === 2 && Y === 1) {
+      this.inputQueue.push('right');
+    }
+    if (X === 1 && Y === 2) {
+      this.inputQueue.push('down');
+    }
+  }
+
   onFocus = () => {
     this.animationLoop?.run();
+    window.setTimeout(() =>
+      this.addEventListener('pointerdown', this.onPointerDown, false), 100
+    );
   }
 
   onBlur = () => {
     this.animationLoop?.stop();
+    this.removeEventListener('pointerdown', this.onPointerDown, false)
   }
 
   onResize = () => {
