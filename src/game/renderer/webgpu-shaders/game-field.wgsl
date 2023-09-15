@@ -33,11 +33,21 @@ fn vertexMain(input: VertexInput) -> VertexOutput {
 // Bindings visible at the fragment stage
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> levelStorage: array<u32>; 
-@group(0) @binding(2) var spriteSampler: sampler;
-@group(0) @binding(3) var spriteTexture: texture_2d<f32>;
+@group(0) @binding(2) var spriteTexture: texture_2d<f32>;
+@group(0) @binding(3) var spriteSampler: sampler;
+
+fn getField(field: vec2i) -> u32 {
+  let dim = vec2i(uniforms.levelSize);
+  if (field.x >= 0 && field.y >= 0 && field.x < dim.x && field.y < dim.y) {
+    return levelStorage[field.y * dim.x + field.x];
+  }
+  return 1;
+}
 
 @fragment
 fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
   let uv = input.uv;
+
+  let color = textureSample(spriteTexture, spriteSampler, uv); 
   return vec4f(uv.x, uv.y, 1, 1);
 }
