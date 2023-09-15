@@ -73,6 +73,9 @@ export class BouldersGame extends HTMLElement {
   }
 
   private async createRenderer()  {
+    if (!this.level) {
+      throw new Error('no level');
+    }
     if (! this.sprites) {
       this.sprites = await loadImage('/gfx/sprites.png');
     }
@@ -81,11 +84,11 @@ export class BouldersGame extends HTMLElement {
       this.renderer.dispose();
       this.renderer = null;
     }
-    this.renderer = rendererFactory(this.engine, this.canvas!, this.sprites);
+    this.renderer = rendererFactory(this.engine, this.canvas!, this.sprites, this.level);
     await this.renderer.setup();
     if (this.level) {
       this.renderer.setSize();
-      this.renderer.frame(this.level);
+      this.renderer.frame();
     }
     if (this.autofocus) {
       setTimeout(() => this.canvas?.focus(), 0);
@@ -219,7 +222,7 @@ export class BouldersGame extends HTMLElement {
 
     this.renderer.setSize();
     if (this.level) {
-      this.renderer.frame(this.level);
+      this.renderer.frame();
     }
   }
 
@@ -227,13 +230,13 @@ export class BouldersGame extends HTMLElement {
     if (!this.level || !this.renderer) {
       return;
     }
-    this.renderer.frame(this.level);
+    this.renderer.frame();
   }
 
   stoneLoop = () => {
     if (this.level) {
       this.level.stoneFall();
-      this.renderer?.frame(this.level!);
+      this.renderer?.frame();
     }
   }
 
@@ -245,19 +248,19 @@ export class BouldersGame extends HTMLElement {
     }
     if (code === 'up') {
       level.move(0, -1);
-      this.renderer?.frame(level);
+      this.renderer?.frame();
     }
     if (code === 'down') {
       level.move(0, 1);
-      this.renderer?.frame(level);
+      this.renderer?.frame();
     }
     if (code === 'left') {
       level.move(-1, 0);
-      this.renderer?.frame(level);
+      this.renderer?.frame();
     }
     if (code === 'right') {
       level.move(1, 0);
-      this.renderer?.frame(level);
+      this.renderer?.frame();
     }
   }
 }

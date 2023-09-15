@@ -29,6 +29,7 @@ export class CanvasRenderer implements IRenderer {
   constructor(
     public canvas: HTMLCanvasElement,
     public sprites: HTMLImageElement,
+    public level: Level,
   ) {}
 
   /**
@@ -61,7 +62,8 @@ export class CanvasRenderer implements IRenderer {
    * @param levelPosition position of the first top left tile (default 0,0)
    * @param offset pixel offset to draw at. (default 0,0)
    */
-  frame(level: Level, levelPosition?: Position, offset?: Position): void {
+  frame(levelPosition?: Position, offset?: Position): void {
+    const { level } = this;
     if (! this.context) {
       throw new Error('context not initialized.');
     }

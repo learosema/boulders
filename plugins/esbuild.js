@@ -28,6 +28,9 @@ module.exports = (eleventyConfig) => {
           bundle: true,
           write: false,
           sourcemap: !isProduction,
+          loader: {
+            '.wgsl': 'text'
+          },
           plugins: [glsl({minify: isProduction})]
         });
 

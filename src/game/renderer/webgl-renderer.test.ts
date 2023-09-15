@@ -3,6 +3,11 @@ import { WebGLRenderer } from "./webgl-renderer";
 
 describe('WebGL Renderer', () => {
   let canvas: HTMLCanvasElement, sprites: HTMLImageElement;
+  const level = Level.parse(`
+    #####
+    #P.$#
+    #####
+  `);
 
   beforeEach(() => {
     global.Image = window.Image;
@@ -14,11 +19,11 @@ describe('WebGL Renderer', () => {
   });
 
   it('should instantiate', () => {
-    expect(new WebGLRenderer(canvas, sprites)).toBeTruthy();
+    expect(new WebGLRenderer(canvas, sprites, level)).toBeTruthy();
   });
 
   it('should setup the WebGL Rendering Context', async () => {
-    const renderer = new WebGLRenderer(canvas, sprites);
+    const renderer = new WebGLRenderer(canvas, sprites, level);
     await renderer.setup();
     expect(renderer.gl).toBeTruthy();
     expect(renderer.gl).toBeInstanceOf(WebGLRenderingContext);
@@ -28,14 +33,9 @@ describe('WebGL Renderer', () => {
     canvas.width = 320;
     canvas.height = 200;
     window.devicePixelRatio = 1;
-    const renderer = new WebGLRenderer(canvas, sprites);
+    const renderer = new WebGLRenderer(canvas, sprites, level);
     await renderer.setup();
-    const level = Level.parse(`
-      ####
-      #P.#
-      ####
-    `);
-    expect(() => renderer.frame(level)).not.toThrow();
+    expect(() => renderer.frame()).not.toThrow();
   });
 
 });
