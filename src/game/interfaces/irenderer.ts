@@ -1,4 +1,4 @@
-import { Level, Position } from "../utils/level";
+import { Position } from "../utils/level";
 import { IDisposable } from "./idisposable";
 
 export interface IRenderer extends IDisposable {
