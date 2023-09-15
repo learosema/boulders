@@ -1,6 +1,6 @@
 import { IRenderer } from "../interfaces/irenderer";
 import { Level, Position } from "../utils/level";
-import { oddly } from "../utils/num-utils";
+import { clamp, oddly } from "../utils/num-utils";
 import { pixelRatio } from "../utils/pixel-ratio";
 import { BufferGeometry } from "../utils/webgl/buffer-geometry";
 import { textureFromImg } from "../utils/webgpu/texture";
@@ -19,15 +19,17 @@ export class WebGPURenderer implements IRenderer {
     position: {
       data: new Float32Array([-1, -1, -1, 1, 1, -1, 1, -1, 1, 1, -1, 1]),
       recordSize: 2,
+      location: 0,
     },
     uv: {
       data: new Float32Array([ 0,  1,  0, 0, 1,  1, 1,  1, 1, 0,  0, 0]),
       recordSize: 2,
+      location: 1,
     }
   };
 
   // to prevent shader errors make sure keys are sorted
-  uniforms = {
+  uniforms: Record<string, number|number[]> = {
     levelPosition: [0,0],
     levelSize: [0,0],
     numTiles: [0,0],
@@ -90,20 +92,25 @@ export class WebGPURenderer implements IRenderer {
       device: this.device,
       format: this.canvasFormat,
     });
+    this.setSize();
+    this.createShaderModule();
     this.createVertexBuffers();
     this.createStorageBuffer();
+    this.setStorageBuffer();
+    this.initUniforms();
     this.spriteTexture = await textureFromImg(this.device, this.sprites);
     this.sampler = this.device.createSampler({
       minFilter: 'nearest',
       magFilter: 'nearest',
     });
-    this.createShaderModule();
 
+    this.createPipeline();
+    this.createBindGroup();
   }
 
   frame(levelPosition?: Position | undefined, offset?: Position | undefined): void {
-    const { context, level } = this;
-    if (! context || !level) {
+    const { context, level, device, pipeline, buffers, bindGroup } = this;
+    if (! context || !level || !device || !pipeline) {
       return;
     }
 
@@ -128,14 +135,45 @@ export class WebGPURenderer implements IRenderer {
         y: (playerPosition?.y || 0) - Math.floor(numTilesY/2),
       }
     }
+
+    const encoder = device.createCommandEncoder();
+    const pass = encoder.beginRenderPass({
+      colorAttachments: [{
+        view: context.getCurrentTexture().createView(),
+        loadOp: "clear",
+        clearValue: [0, 0, 0.5, 1],
+        storeOp: "store",
+      }]
+    });
+
+
+    pass.setPipeline(pipeline);
+    pass.setBindGroup(0, bindGroup);
+    for (const [key, val] of Object.entries(this.geometry)) {
+      const vertexBuffer = buffers[key];
+      pass.setVertexBuffer(val.location!, vertexBuffer);
+    }
+    pass.draw(
+      this.geometry.position.data.length / this.geometry.position.recordSize
+    );
+    pass.end();
+    device.queue.submit([encoder.finish()]);
   }
 
   setSize(): void {
+    const {device} = this;
+    if (! device) {
+      return;
+    }
     this.pixelRatio = pixelRatio();
+
     this.dimensions = {
-      width: this.canvas.clientWidth * this.pixelRatio,
-      height: this.canvas.clientHeight * this.pixelRatio,
+      width: clamp(this.canvas.clientWidth * this.pixelRatio, 1,
+        device.limits.maxTextureDimension2D),
+      height: clamp(this.canvas.clientHeight * this.pixelRatio, 1,
+        device.limits.maxTextureDimension2D),
     };
+
     const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
     // display at least 10x10 tiles on screen.
@@ -145,7 +183,13 @@ export class WebGPURenderer implements IRenderer {
   }
 
   dispose(): void {
-
+    // destroy all buffers and textures we created
+    for (const [key, val] of Object.entries(this.buffers)) {
+      val.destroy();
+    }
+    this.uniformBuffer?.destroy();
+    this.levelStorage?.destroy();
+    this.spriteTexture?.destroy();
   }
 
   private createVertexBuffers(): void {
@@ -193,7 +237,7 @@ export class WebGPURenderer implements IRenderer {
     })
   }
 
-  private setStorageBuffer() {
+  private setStorageBuffer(): void {
     const { device, level } = this;
     if (! device) {
       throw new Error('no device')
@@ -217,7 +261,8 @@ export class WebGPURenderer implements IRenderer {
     }
     let size = 0;
     const sortedKeys = Object.keys(this.uniforms).sort();
-    for (const [key, val] of Object.entries(this.uniforms)) {
+    for (const key of sortedKeys) {
+      const val = this.uniforms[key];
       const itemSize = (val instanceof Array) ? val.length : 1;
       this.uniformOffsets[key] = size;
       size += itemSize;
@@ -233,7 +278,7 @@ export class WebGPURenderer implements IRenderer {
   private setUniforms(): void {
     const { device } = this;
     if (! device) {
-      throw new Error('no device')
+      throw new Error('no device');
     }
     if (! this.uniformBuffer || !this.uniformValues || !this.uniformOffsets) {
       throw new Error('call initUniforms first');
@@ -258,9 +303,15 @@ export class WebGPURenderer implements IRenderer {
       throw new Error('no shader module');
     }
 
+    const pipelineLayout = device.createPipelineLayout({
+      bindGroupLayouts: [
+        this.createBindGroupLayout(), // @group(0)
+      ]
+    });
+
     this.pipeline = device.createRenderPipeline({
       label: 'Level Render Pipeline',
-      layout: 'auto',
+      layout: pipelineLayout,
       vertex: {
         module: this.shaderModule,
         entryPoint: 'vertexMain',
@@ -276,13 +327,47 @@ export class WebGPURenderer implements IRenderer {
     });
   }
 
+  private createBindGroupLayout(): GPUBindGroupLayout {
+    const { device } = this;
+    if (! device) {
+      throw new Error('no device');
+    }
+    const bindGroupLayout = device.createBindGroupLayout({
+      entries: [{
+        binding: 0, // uniforms
+        visibility: GPUShaderStage.FRAGMENT,
+        buffer: {},
+      }, {
+        binding: 1, // level storage
+        visibility: GPUShaderStage.FRAGMENT,
+        buffer: {
+          type: 'storage',
+        },
+      }, {
+        binding: 2, // sprite texture
+        visibility: GPUShaderStage.FRAGMENT,
+        texture: {
+          sampleType: 'float'
+        },
+      }, {
+        binding: 3, // baseColor sampler
+        visibility: GPUShaderStage.FRAGMENT,
+        sampler: {},
+      }]
+    });
+    return bindGroupLayout;
+  }
+
+
+
   private createBindGroup(): void {
-    const { device, pipeline, uniformBuffer, levelStorage } = this;
-    if (!device || !pipeline || !uniformBuffer || !levelStorage) {
+    const { device, pipeline, uniformBuffer, levelStorage, spriteTexture, sampler } = this;
+    if (!device || !pipeline || !uniformBuffer || !levelStorage || !spriteTexture || !sampler) {
       throw new Error('not initialized');
     }
+
     this.bindGroup = device.createBindGroup({
-      label: "Cell renderer bind group A",
+      label: "My Bind Group",
       layout: this.pipeline!.getBindGroupLayout(0),
       entries: [{
         binding: 0,
@@ -290,10 +375,15 @@ export class WebGPURenderer implements IRenderer {
       }, {
         binding: 1,
         resource: { buffer: levelStorage }
+      }, {
+        binding: 2,
+        resource: this.spriteTexture!.createView(),
+      }, {
+        binding: 3,
+        resource: this.sampler!
       }],
     });
   }
-
 
   private createShaderModule(): void {
     const { device } = this;
@@ -305,5 +395,4 @@ export class WebGPURenderer implements IRenderer {
       code: wgslShader
     })
   }
-
 }

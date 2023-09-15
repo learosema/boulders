@@ -4,3 +4,7 @@ body {
   background: #000;
   color: #fff;
 }
+
+a {
+  color: var(--blue-2);
+}
