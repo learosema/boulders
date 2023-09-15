@@ -1,5 +1,5 @@
 module.exports = {
-  url: process.env.URL || 'http://localhost:8080',
+  url: process.env.URL || '',
   siteName: "Boulders Game",
   siteDescription: "Yet another Boulder Dash Clone",
   siteType: 'Person',

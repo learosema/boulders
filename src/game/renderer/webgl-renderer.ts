@@ -56,6 +56,7 @@ export class WebGLRenderer implements IRenderer {
   constructor(
     public canvas: HTMLCanvasElement,
     public sprites: HTMLImageElement,
+    public level: Level
   ) {}
 
   async setup(): Promise<void> {
@@ -72,8 +73,8 @@ export class WebGLRenderer implements IRenderer {
     this.enableBuffers();
   }
 
-  frame(level: Level, levelPosition?: Position | undefined, offset?: Position | undefined): void {
-    const { gl } = this;
+  frame(levelPosition?: Position | undefined, offset?: Position | undefined): void {
+    const { gl, level } = this;
     if (! gl || !level) {
       return;
     }
