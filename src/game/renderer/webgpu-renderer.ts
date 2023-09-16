@@ -3,7 +3,7 @@ import { Level, Position } from "../utils/level";
 import { clamp, oddly } from "../utils/num-utils";
 import { pixelRatio } from "../utils/pixel-ratio";
 import { BufferGeometry } from "../utils/webgl/buffer-geometry";
-import { textureFromImg } from "../utils/webgpu/texture";
+import { textureFromURL } from "../utils/webgpu/texture";
 import wgslShader from './webgpu-shaders/game-field.wgsl';
 
 export class WebGPURenderer implements IRenderer {
@@ -98,7 +98,7 @@ export class WebGPURenderer implements IRenderer {
     this.createStorageBuffer();
     this.setStorageBuffer();
     this.initUniforms();
-    this.spriteTexture = await textureFromImg(this.device, this.sprites);
+    this.spriteTexture = await textureFromURL(this.device, this.sprites.src);
     this.sampler = this.device.createSampler({
       minFilter: 'nearest',
       magFilter: 'nearest',
@@ -110,7 +110,7 @@ export class WebGPURenderer implements IRenderer {
 
   frame(levelPosition?: Position | undefined, offset?: Position | undefined): void {
     const { context, level, device, pipeline, buffers, bindGroup } = this;
-    if (! context || !level || !device || !pipeline) {
+    if (! context || !level || !device || !pipeline || !buffers || !bindGroup) {
       return;
     }
 
@@ -143,7 +143,7 @@ export class WebGPURenderer implements IRenderer {
         loadOp: "clear",
         clearValue: [0, 0, 0.5, 1],
         storeOp: "store",
-      }]
+      }],
     });
 
 
@@ -347,25 +347,26 @@ export class WebGPURenderer implements IRenderer {
         binding: 2, // sprite texture
         visibility: GPUShaderStage.FRAGMENT,
         texture: {
-          sampleType: 'float'
+          sampleType: 'float',
+          multisampled: false,
+          viewDimension: '2d',
         },
       }, {
-        binding: 3, // baseColor sampler
+        binding: 3, // sampler
         visibility: GPUShaderStage.FRAGMENT,
-        sampler: {},
+        sampler: {
+          type: 'filtering',
+        },
       }]
     });
     return bindGroupLayout;
   }
-
-
 
   private createBindGroup(): void {
     const { device, pipeline, uniformBuffer, levelStorage, spriteTexture, sampler } = this;
     if (!device || !pipeline || !uniformBuffer || !levelStorage || !spriteTexture || !sampler) {
       throw new Error('not initialized');
     }
-
     this.bindGroup = device.createBindGroup({
       label: "My Bind Group",
       layout: this.pipeline!.getBindGroupLayout(0),

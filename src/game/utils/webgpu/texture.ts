@@ -6,6 +6,7 @@ export async function textureFromImageBitmap(device: GPUDevice, source: ImageBit
     format: 'rgba8unorm',
     usage:
       GPUTextureUsage.TEXTURE_BINDING |
+      GPUTextureUsage.RENDER_ATTACHMENT |
       GPUTextureUsage.COPY_DST,
   };
   const texture = device.createTexture(textureDescriptor);
