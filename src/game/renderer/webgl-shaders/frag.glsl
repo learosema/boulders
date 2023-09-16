@@ -79,5 +79,6 @@ void main() {
   }
 */
   vec3 blendedColor = mix(vec3(.4), vec3(1.), 1. - min(d, 1.)) * color.rgb;
-  gl_FragColor = vec4(blendedColor, 1.);
+  //gl_FragColor = vec4(blendedColor, 1.);
+  gl_FragColor = texture2D(levelTexture, vUv);
 }
