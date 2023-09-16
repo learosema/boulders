@@ -29,7 +29,7 @@ int getField(vec2 p) {
   // rely on CLAMP_TO_EDGE, requiring the level is always surrounded by walls.
   if (p.x >= 0. && p.x < levelSize.x && p.y >= 0. && p.y < levelSize.y) {
     vec4 level = texture2D(levelTexture, (p + 0.5) / levelSize);
-    return int(level.r * 255.);
+    return int(round(level.r * 255.));
   }
   return 1;
 }
