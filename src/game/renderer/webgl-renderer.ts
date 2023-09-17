@@ -6,7 +6,6 @@ import { TextureFilter, Texture } from "../utils/webgl/texture";
 import vertexShader from './webgl-shaders/vert.glsl';
 import fragmentShader from './webgl-shaders/frag.glsl';
 import { createProgram } from "../utils/webgl/shader";
-import { pixelRatio } from "../utils/pixel-ratio";
 import { clamp, oddly } from "../utils/num-utils";
 
 export class WebGLRenderer implements IRenderer {
@@ -66,7 +65,7 @@ export class WebGLRenderer implements IRenderer {
     if (! this.gl) {
       throw new Error('webgl initialization failed.');
     }
-    this.spriteTexture = new Texture(this.sprites);
+    this.spriteTexture = new Texture(this.sprites, {minFilter: TextureFilter.LINEAR, magFilter: TextureFilter.NEAREST});
     this.uniforms.spriteTexture = this.spriteTexture;
     this.spriteTexture.upload(this.gl, 0);
     this.createBuffers();
