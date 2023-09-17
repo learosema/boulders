@@ -9,6 +9,7 @@ uniform vec2 spriteSize;
 uniform vec2 levelSize;
 uniform vec2 offset;
 uniform vec2 levelPosition;
+uniform vec2 numTiles;
 uniform int playerAlive;
 uniform vec2 playerPosition;
 uniform float playerDirection;
@@ -61,24 +62,25 @@ void main() {
   // Lighting
   float d = 1000.;
   vec2 centerPlayerPos = absPlayerPos + tileSize / 2.;
-  d = min(d, distance(pos, centerPlayerPos) * .00125);
+  d = min(d, distance(pos, centerPlayerPos) * .0125);
 
-  
+
+  int range = (1 + int(numTiles)) / 2;
 /*
-  Unfortunately, this is too slow.
-
-  for (int y = -8; y < 8; y++) {
-    for (int x = -8; x < 8; x++) {
+  This is quite slow.
+*/
+  for (int y = -16; y < 16; y++) {
+    for (int x = -16; x < 16; x++) {
       XY = vec2(float(x), float(y)) + playerPosition;
       if (getField(XY) == GEM) {
         vec2 gemCenter = offset + (XY - levelPosition + .5) * tileSize;
-        float gemD = distance(pos, gemCenter) * (1. / 300.);
+        float gemD = distance(pos, gemCenter) * 0.025;
         d = min(d, gemD);
       }
     }
   }
-*/
-  vec3 blendedColor = blend(vec3(.4), vec3(1.), 1. - min(d, 1.)) * color.rgb;
+
+  vec3 blendedColor = mix(vec3(.3), vec3(1.), 1. - min(d, 1.)) * color.rgb;
   gl_FragColor = vec4(blendedColor, 1.);
   // gl_FragColor = vec4(texture2D(levelTexture, vUv).rrr * 40., 1.);
 }

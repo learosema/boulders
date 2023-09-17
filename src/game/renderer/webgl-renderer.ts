@@ -37,9 +37,11 @@ export class WebGLRenderer implements IRenderer {
   dimensions = {width: 0, height: 0};
 
   /**
-   * current pixel ratio
+   * current pixel ratio:
+   * we will be running the game with a reduced pixel ratio to improve performance on slower machines
+   * and as we are doing pixel graphics, it doesn't make too much of a difference.
    */
-  pixelRatio = 1;
+  pixelRatio = .5;
 
   tileSize = 64;
 
@@ -122,7 +124,6 @@ export class WebGLRenderer implements IRenderer {
     if (! gl || !canvas) {
       throw new Error('Canvas not initialized.');
     }
-    this.pixelRatio = pixelRatio();
     const width = this.canvas.clientWidth * this.pixelRatio;
     const height = this.canvas.clientHeight * this.pixelRatio;
     this.dimensions = {
