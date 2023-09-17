@@ -65,7 +65,7 @@ export class WebGLRenderer implements IRenderer {
     if (! this.gl) {
       throw new Error('webgl initialization failed.');
     }
-    this.spriteTexture = new Texture(this.sprites, {minFilter: TextureFilter.LINEAR, magFilter: TextureFilter.NEAREST});
+    this.spriteTexture = new Texture(this.sprites, {minFilter: TextureFilter.NEAREST, magFilter: TextureFilter.NEAREST});
     this.uniforms.spriteTexture = this.spriteTexture;
     this.spriteTexture.upload(this.gl, 0);
     this.createBuffers();
@@ -133,9 +133,8 @@ export class WebGLRenderer implements IRenderer {
     gl.viewport(0, 0, width, height);
     const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
-    // try to display at least 10x10 tiles on screen, show more on desktops, don't shrink sprites below 16x16
-    // and please let's use integer pixels.
-    this.tileSize = Math.floor(clamp(Math.round(viewportMin / 10), 16, 64));
+    // bigger tiles on desktops and tablets.
+    this.tileSize = (viewportMin < 700 ? 32 : 64);
   }
 
   dispose() {
