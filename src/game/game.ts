@@ -1,6 +1,5 @@
-import { FreqMod, createFilter } from "./audio/FreqMod";
+import { SoundMachine } from "./audio/SoundMachine";
 import { IRenderer } from "./interfaces/irenderer";
-import { CanvasRenderer } from "./renderer/canvas-renderer";
 import { SupportedEngines, rendererFactory } from "./renderer/engines";
 import { AnimationLoop } from "./utils/animation-interval";
 import { Level, LevelCallbackFunction } from "./utils/level";
@@ -16,11 +15,8 @@ export class BouldersGame extends HTMLElement {
   sprites: HTMLImageElement|null = null;
   animationLoop: AnimationLoop|null = null;
   inputQueue: string[] = [];
-  audioContext = new AudioContext();
-  mainGain = this.audioContext.createGain();
-  lowPass1 = createFilter(this.audioContext, 'lowpass', 800);
-  lowPass2 = createFilter(this.audioContext, 'lowpass', 350);
   framecycles = 0;
+  soundMachine = new SoundMachine();
 
   constructor() {
     super();
@@ -118,10 +114,7 @@ export class BouldersGame extends HTMLElement {
   }
 
   private async setup() {
-    this.audioContext.resume();
-
-    this.mainGain.gain.value = .25;
-    this.mainGain.connect(this.audioContext.destination);
+    this.soundMachine.setup();
     if (! this.renderer) {
       await this.createRenderer();
     }
@@ -139,6 +132,7 @@ export class BouldersGame extends HTMLElement {
   dispose() {
     this.animationLoop?.dispose();
     this.renderer?.dispose();
+    this.soundMachine.dispose();
     this.destroyCanvas();
     this.level?.unsubscribe();
     this.renderer = null;
@@ -147,34 +141,20 @@ export class BouldersGame extends HTMLElement {
 
   onGameEvent: LevelCallbackFunction = (eventName: string) => {
     if (eventName === 'gem') {
-      const FM = new FreqMod(this.audioContext, 12, 4).withFilter(this.lowPass1).toDestination(this.mainGain);
-      FM.play('C6', this.audioContext.currentTime, this.audioContext.currentTime + .25);
-      setTimeout(() => FM.dispose(), 500);
+      this.soundMachine.bling();
     }
     if (eventName === 'push') {
-      const FM = new FreqMod(this.audioContext, 2, 2, 'sawtooth', 'sine').withFilter(this.lowPass2).toDestination(this.mainGain);
-      FM.play('C0', this.audioContext.currentTime, this.audioContext.currentTime + .25, .5, 1);
-      setTimeout(() => FM.dispose(), 250);
+      this.soundMachine.push();
     }
     if (eventName === 'ground') {
-      const FM = new FreqMod(this.audioContext, 2, 2, 'sawtooth', 'sawtooth').withFilter(this.lowPass2).toDestination(this.mainGain);
-      FM.play('A0', this.audioContext.currentTime, this.audioContext.currentTime + .25);
-      setTimeout(() => FM.dispose(), 250);
+      this.soundMachine.rock();
     }
     if (eventName === 'gameover') {
-      const FM = new FreqMod(this.audioContext, 24, 4).withFilter(this.lowPass1).toDestination(this.mainGain);
-      FM.play('D#3', this.audioContext.currentTime, this.audioContext.currentTime + .25);
-      FM.play('D3', this.audioContext.currentTime + .26, this.audioContext.currentTime + .5);
-      FM.play('A#2', this.audioContext.currentTime + .51, this.audioContext.currentTime + .75);
-      FM.play('G2', this.audioContext.currentTime + .76, this.audioContext.currentTime + 1.);
-      setTimeout(() => FM.dispose(), 1300);
+      this.soundMachine.gameover();
     }
   }
 
   onKeyDown = (e: KeyboardEvent) => {
-    if (this.audioContext.state === 'suspended') {
-      this.audioContext.resume();
-    }
     if (e.code === 'Escape') {
       const gameMenu: HTMLDialogElement = document.getElementById('gameMenu') as HTMLDialogElement;
       window.setTimeout(() => gameMenu.showModal(), 0);
