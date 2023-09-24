@@ -1,4 +1,4 @@
-import { SoundMachine } from "./audio/SoundMachine";
+import { SoundMachine } from "./audio/sound-machine";
 import { IRenderer } from "./interfaces/irenderer";
 import { SupportedEngines, rendererFactory } from "./renderer/engines";
 import { AnimationLoop } from "./utils/animation-interval";
