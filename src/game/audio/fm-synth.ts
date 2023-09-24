@@ -26,7 +26,7 @@ export const createFilter = (AC: AudioContext, type: BiquadFilterType, frequency
   return filter;
 }
 
-export class FreqMod {
+export class FMSynth {
 
   carrier: OscGainNode;
   modulator: OscGainNode;
@@ -66,14 +66,26 @@ export class FreqMod {
     return this;
   }
 
-  play(note: string, startTime: number, endTime: number, startVolume = 1, endVolume = 0) {
+  play(note: string, startVolume = 1, startTime = 0) {
+    const absStartTime = this.audioContext.currentTime + startTime;
     const frequency = noteToFrequency(note);
-    this.carrier.osc.frequency.setValueAtTime(frequency, startTime);
-    this.modulator.osc.frequency.setValueAtTime(this.modulationFrequency, startTime);
-    this.modulator.gain.gain.setValueAtTime(frequency / this.modulationDepth, startTime);
-    this.carrier.gain.gain.setValueAtTime(startVolume, startTime);
-    this.carrier.gain.gain.linearRampToValueAtTime(endVolume, endTime);
-    this.carrier.gain.gain.setValueAtTime(0, endTime + 0.00001);
+    this.carrier.osc.frequency.setValueAtTime(frequency, absStartTime);
+    this.modulator.osc.frequency.setValueAtTime(this.modulationFrequency, absStartTime);
+    this.modulator.gain.gain.setValueAtTime(frequency / this.modulationDepth, absStartTime);
+    this.carrier.gain.gain.setValueAtTime(startVolume, absStartTime);
+    return this;
+  }
+
+  rampToVolumeAtTime(volume: number, time: number) {
+    const absTime = this.audioContext.currentTime + time;
+    this.carrier.gain.gain.linearRampToValueAtTime(volume, absTime);
+    return this;
+  }
+
+  setVolumeAtTime(volume: number, time: number) {
+    const absTime = this.audioContext.currentTime + time;
+    this.carrier.gain.gain.setValueAtTime(volume, absTime);
+    return this;
   }
 
   dispose() {
