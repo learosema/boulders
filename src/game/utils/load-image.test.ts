@@ -1,6 +1,10 @@
 import { loadImage } from "./load-image";
 
 describe('loadImage function', () => {
+  beforeEach(() => {
+    jest.resetAllMocks()
+    global.Image = window.Image;
+  });
 
   // data-URL of a transparent pixel.
   const DATA_URL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
