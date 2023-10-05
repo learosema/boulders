@@ -4,6 +4,6 @@ export function loadImage(url: string|HTMLImageElement): Promise<HTMLImageElemen
     img.crossOrigin = 'anonymous';
     img.src = typeof url === "string" ? url : url.src;
     img.onload = () => resolve(img);
-    img.onerror = (errorEvent) => reject(errorEvent);
+    img.onerror = (error) => reject(error);
   });
 }
