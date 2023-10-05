@@ -11,5 +11,5 @@ describe('loadImage function', () => {
     expect(image.width).toBe(1);
     expect(image.height).toBe(1);
   });
+});
 
-})
