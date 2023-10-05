@@ -4,6 +4,12 @@ import { CanvasRenderer } from './canvas-renderer';
 describe('Canvas Renderer', () => {
   let canvas: HTMLCanvasElement, sprites: HTMLImageElement;
 
+  const level = Level.parse(`
+    ####
+    #P.#
+    ####
+  `);
+
   beforeEach(() => {
     global.Image = window.Image;
     sprites = new Image(8 * 16, 16);
@@ -14,11 +20,11 @@ describe('Canvas Renderer', () => {
   });
 
   it('should instantiate', () => {
-    expect(new CanvasRenderer(canvas, sprites)).toBeTruthy();
+    expect(new CanvasRenderer(canvas, sprites, level)).toBeTruthy();
   });
 
   it('should setup the 2D rendering context', async () => {
-    const renderer = new CanvasRenderer(canvas, sprites);
+    const renderer = new CanvasRenderer(canvas, sprites, level);
     await renderer.setup();
     expect(renderer.context).toBeTruthy();
     expect(renderer.context).toBeInstanceOf(CanvasRenderingContext2D);
@@ -28,14 +34,13 @@ describe('Canvas Renderer', () => {
     canvas.width = 320;
     canvas.height = 200;
     window.devicePixelRatio = 1;
-    const renderer = new CanvasRenderer(canvas, sprites);
+
+
+
+    const renderer = new CanvasRenderer(canvas, sprites, level);
     await renderer.setup();
-    const level = Level.parse(`
-      ####
-      #P.#
-      ####
-    `);
-    expect(() => renderer.frame(level)).not.toThrow();
+
+    expect(() => renderer.frame()).not.toThrow();
   });
 
 });
