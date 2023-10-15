@@ -1,4 +1,4 @@
-import { Direction, Field, Flag, Level } from "./level";
+import { Direction, Field, Flag, GHOST_DIR, Level } from "./level";
 
 describe('Level class', () => {
 
@@ -189,7 +189,7 @@ describe('Level class', () => {
     expect(level.getField(2, 2)).toEqual(Field.STONE);
 
     // expect the stone to have the FALLING flag set
-    expect(level.getFlag(2,2)).toBe(Flag.FALLING);
+    expect(level.getFlags(2,2)).toBe(Flag.FALLING);
   });
 
   it('should notify subscribers when a falling stone hits the ground', () => {
@@ -207,7 +207,7 @@ describe('Level class', () => {
 
     // as the falling stone has hit the ground
     // the falling flag is expected to be cleared.
-    expect(level.getFlag(2,2)).toBe(Flag.NONE);
+    expect(level.getFlags(2,2)).toBe(Flag.NONE);
     expect(spy).toHaveBeenCalledWith('ground', undefined);
   });
 
@@ -256,8 +256,8 @@ describe('Level class', () => {
 
     expect(level.getField(3, 1)).toBe(Field.EMPTY);
     expect(level.getField(4, 1)).toBe(Field.STONE);
-    expect(level.getFlag(3, 1)).toBe(Flag.NONE);
-    expect(level.getFlag(4, 1)).toBe(Flag.FALLING);
+    expect(level.getFlags(3, 1)).toBe(Flag.NONE);
+    expect(level.getFlags(4, 1)).toBe(Flag.FALLING);
   });
 
   it('should move a stone to the left when there is a stone or gem below but the right side is blocked', () => {
@@ -272,7 +272,21 @@ describe('Level class', () => {
     expect(level.getField(3, 1)).toBe(Field.EMPTY);
     expect(level.getField(2, 1)).toBe(Field.STONE);
 
-    expect(level.getFlag(3, 1)).toBe(Flag.NONE);
-    expect(level.getFlag(2, 1)).toBe(Flag.FALLING);
+    expect(level.getFlags(3, 1)).toBe(Flag.NONE);
+    expect(level.getFlags(2, 1)).toBe(Flag.FALLING);
+  });
+
+  it('should move a ghost in the direction it is facing', () => {
+    const level = Level.parse(`
+      ####
+      #P #
+      # G#
+      ####
+    `);
+    level.setFlag(2, 2, GHOST_DIR.LEFT);
+    level.moveGhosts();
+
+    expect(level.getField(1, 2)).toEqual(Field.GHOST);
+    expect(level.getField(1, 2)).toEqual(Field.EMPTY);
   });
 });

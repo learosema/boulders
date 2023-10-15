@@ -123,6 +123,7 @@ export class BouldersGame extends HTMLElement {
       this.animationLoop.add(this.renderLoop, 1000 / 25);
       this.animationLoop.add(this.inputLoop, 50);
       this.animationLoop.add(this.stoneLoop, 200);
+      this.animationLoop.add(this.ghostLoop, 300);
     }
     this.level.subscribe(this.onGameEvent);
 
@@ -232,6 +233,13 @@ export class BouldersGame extends HTMLElement {
   stoneLoop = () => {
     if (this.level) {
       this.level.stoneFall();
+      this.renderer?.frame();
+    }
+  }
+
+  ghostLoop = () => {
+    if (this.level) {
+      this.level.moveGhosts();
       this.renderer?.frame();
     }
   }
