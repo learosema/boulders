@@ -341,7 +341,7 @@ export class WebGPURenderer implements IRenderer {
         binding: 1, // level storage
         visibility: GPUShaderStage.FRAGMENT,
         buffer: {
-          type: 'storage',
+          type: 'read-only-storage',
         },
       }, {
         binding: 2, // sprite texture
