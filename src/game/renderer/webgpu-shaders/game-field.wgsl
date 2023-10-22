@@ -44,11 +44,27 @@ fn getField(field: vec2i) -> u32 {
   return 1;
 }
 
+
+
 @fragment
 fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
   let uv = input.uv;
-  let field = getField(vec2i(1, 1));
-  let color = textureSample(spriteTexture, spriteSampler, uv);
+  let pos = input.uv * uniforms.resolution;
+  let XY = floor((pos - uniforms.offset) / uniforms.tileSize);
+  // not sure if right...
+  let xy = fract((pos - uniforms.offset) / uniforms.tileSize);
+  let tile = getField(vec2i(XY + uniforms.levelPosition));
+  var color = vec4f(0, 0, 0, 1);
+  // mimimi uniformity 
+  // https://github.com/gpuweb/gpuweb/issues/3479
+  if (tile > 0) {
+    let NUM_SPRITES = 8;
+    let spriteOffset = vec2f((xy.x + f32(tile - 1)) * 1. / f32(NUM_SPRITES), xy.y);
+    color = textureSample(spriteTexture, spriteSampler, spriteOffset);
+  }
+
+
+  // color = textureSample(spriteTexture, spriteSampler, uv);
   return color;
   // return vec4f(uv.x, uv.y, 1, 1);
 }
