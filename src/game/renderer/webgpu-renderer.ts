@@ -1,9 +1,10 @@
 import { IRenderer } from "../interfaces/irenderer";
-import { Level, Position } from "../utils/level";
+import { Dimension, Direction, Level, Position } from "../utils/level";
 import { clamp, oddly } from "../utils/num-utils";
 import { pixelRatio } from "../utils/pixel-ratio";
 import { BufferGeometry } from "../utils/webgl/buffer-geometry";
 import { textureFromURL } from "../utils/webgpu/texture";
+import { UniformStruct } from "../utils/webgpu/uniform-struct";
 import wgslShader from './webgpu-shaders/game-field.wgsl';
 
 export class WebGPURenderer implements IRenderer {
@@ -29,7 +30,7 @@ export class WebGPURenderer implements IRenderer {
   };
 
   // to prevent shader errors make sure keys are sorted
-  uniforms: Record<string, number|number[]> = {
+  uniformStruct = new UniformStruct({
     levelPosition: [0,0],
     levelSize: [0,0],
     numTiles: [0,0],
@@ -41,9 +42,12 @@ export class WebGPURenderer implements IRenderer {
     spriteSize: [0,0],
     tileSize: 0,
     time: 0,
-  }
+  })
 
-  dimensions = {width: 0, height: 0};
+  dimensions: Dimension = {
+    width: 0,
+    height: 0
+  };
 
   /**
    * current pixel ratio
@@ -52,23 +56,32 @@ export class WebGPURenderer implements IRenderer {
 
   tileSize = 64;
 
-  uniformValues: Float32Array|null = null;
   uniformBuffer: GPUBuffer|null = null;
-  uniformOffsets: Record<string, number> = {};
 
   adapter: GPUAdapter|null = null;
+
   device: GPUDevice|null = null;
+
   buffers: Record<string, GPUBuffer> = {};
+
   spriteTexture: GPUTexture|null = null;
+
   sampler: GPUSampler|null = null;
 
   context: GPUCanvasContext|null = null;
+
   levelArray: Uint32Array|null = null;
+
   vertexBufferLayout: GPUVertexBufferLayout[] = [];
+
   levelStorage: GPUBuffer|null = null;
+
   pipeline: GPURenderPipeline|null = null;
+
   canvasFormat: GPUTextureFormat|null = null;
+
   shaderModule: GPUShaderModule|null = null;
+
   bindGroup: GPUBindGroup|null = null;
 
   constructor(
@@ -135,6 +148,22 @@ export class WebGPURenderer implements IRenderer {
         y: (playerPosition?.y || 0) - Math.floor(numTilesY/2),
       }
     }
+    this.setStorageBuffer();
+    Object.assign(this.uniformStruct.data, {
+      levelPosition: [levelPosition.x, levelPosition.y],
+      levelSize: [this.level.dimensions.width, this.level.dimensions.height],
+      numTiles: [numTilesX, numTilesY],
+      offset: [offset.x, offset.y],
+      playerAlive: this.level.playerAlive ? 1 : 0,
+      playerPosition: [playerPosition?.x || 0, playerPosition?.y || 0],
+      playerDirection: this.level.playerDirection === Direction.LEFT ? 1 : 0,
+      resolution: [this.dimensions.width, this.dimensions.height],
+      spriteSize: this.spriteSize,
+      tileSize: this.tileSize,
+      time: performance.now(),
+    });
+
+    this.setUniforms();
 
     const encoder = device.createCommandEncoder();
     const pass = encoder.beginRenderPass({
@@ -167,12 +196,12 @@ export class WebGPURenderer implements IRenderer {
     }
     this.pixelRatio = pixelRatio();
 
-    this.dimensions = {
+    Object.assign(this.dimensions, {
       width: clamp(this.canvas.clientWidth * this.pixelRatio, 1,
         device.limits.maxTextureDimension2D),
       height: clamp(this.canvas.clientHeight * this.pixelRatio, 1,
         device.limits.maxTextureDimension2D),
-    };
+    });
 
     const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
@@ -233,7 +262,8 @@ export class WebGPURenderer implements IRenderer {
     this.levelStorage = device.createBuffer({
       label: "Level Data",
       size: this.levelArray.byteLength,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      usage:
+        GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     })
   }
 
@@ -242,9 +272,10 @@ export class WebGPURenderer implements IRenderer {
     if (! device) {
       throw new Error('no device')
     }
+
     const levelFlat = level.level.flat();
-    if (!this.levelArray || !this.levelStorage ||
-      !(this.levelArray.length !== levelFlat.length)) {
+    if (!this.levelArray || !this.levelStorage) {
+        console.log('möö.')
       this.createStorageBuffer();
     }
     if (!this.levelArray || !this.levelStorage) {
@@ -259,17 +290,8 @@ export class WebGPURenderer implements IRenderer {
     if (! device) {
       throw new Error('no device')
     }
-    let size = 0;
-    const sortedKeys = Object.keys(this.uniforms).sort();
-    for (const key of sortedKeys) {
-      const val = this.uniforms[key];
-      const itemSize = (val instanceof Array) ? val.length : 1;
-      this.uniformOffsets[key] = size;
-      size += itemSize;
-    }
-    this.uniformValues = new Float32Array(size);
     this.uniformBuffer = device.createBuffer({
-      size: size * 4,
+      size: this.uniformStruct.buffer.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
     this.setUniforms();
@@ -280,18 +302,11 @@ export class WebGPURenderer implements IRenderer {
     if (! device) {
       throw new Error('no device');
     }
-    if (! this.uniformBuffer || !this.uniformValues || !this.uniformOffsets) {
+    if (! this.uniformBuffer) {
       throw new Error('call initUniforms first');
     }
-    for (const [key, val] of Object.entries(this.uniforms)) {
-      const offset = this.uniformOffsets[key];
-      if (typeof offset === 'undefined') {
-        continue;
-      }
-      this.uniformValues.set(val instanceof Array ? val: [val], offset);
-    }
     // copy the values from JavaScript to the GPU
-    device.queue.writeBuffer(this.uniformBuffer, 0, this.uniformValues);
+    device.queue.writeBuffer(this.uniformBuffer, 0, this.uniformStruct.buffer);
   }
 
   private createPipeline() {

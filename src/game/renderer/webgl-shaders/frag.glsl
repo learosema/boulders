@@ -38,7 +38,7 @@ int getField(vec2 p) {
 void main() { 
   vec2 pos = vUv * resolution;
   vec2 XY = floor((pos - offset) / tileSize);
-  vec2 xy = mod((pos - offset), tileSize) / tileSize;
+  vec2 xy = fract((pos - offset) / tileSize);
   int tile = getField(XY + levelPosition);
   vec4 sprite = vec4(0., 0., 0., 1.);
   if (tile > 0) {
@@ -80,7 +80,7 @@ void main() {
     }
   }
 
-  vec3 blendedColor = mix(vec3(.3), vec3(1.), 1. - min(d, 1.)) * color.rgb;
+  vec3 blendedColor = mix(vec3(.5), vec3(1.), 1. - min(d, 1.)) * color.rgb;
   gl_FragColor = vec4(blendedColor, 1.);
   // gl_FragColor = vec4(texture2D(levelTexture, vUv).rrr * 40., 1.);
 }
