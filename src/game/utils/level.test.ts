@@ -287,6 +287,6 @@ describe('Level class', () => {
     level.moveGhosts();
 
     expect(level.getField(1, 2)).toEqual(Field.GHOST);
-    expect(level.getField(1, 2)).toEqual(Field.EMPTY);
+    expect(level.getField(2, 2)).toEqual(Field.EMPTY);
   });
 });
