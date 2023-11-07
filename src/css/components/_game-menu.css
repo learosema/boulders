@@ -19,5 +19,28 @@
   &::backdrop {
     backdrop-filter: blur(4px);
   }
+
+  > .field label {
+    display: block;
+  }
+
+  & .button, 
+  & .select {
+    display: block;
+    border: none;
+    border-radius: 2px;
+    text-align: center;
+    background: var(--button-bg);
+    color: var(--button-fg);
+    text-decoration: none;
+    padding: .5em 1em;
+    width: 100%;
+    user-select: none;
+  
+    &:active {
+      background: var(--button-bg--active);
+    }
+  }
+  
 }
 

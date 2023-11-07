@@ -21,3 +21,8 @@ button, *:where([tabindex="0"]) {
   color: currentColor;
   text-decoration: none;
 }
+
+select {
+  font-family: inherit;
+  font-size: inherit;
+}
