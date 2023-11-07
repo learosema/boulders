@@ -8,13 +8,14 @@ export class UniformStruct {
   public buffer = new ArrayBuffer(0);
   public typedArrays: Record<string, Float32Array|Int32Array> = {}
   public data: UniformStructData;
+  #internalData: Record<string, number|Iterable<number>> = {};
 
   constructor(initialData ?: UniformStructData) {
-    this._data = Object.assign({}, initialData || {});
+    this.#internalData = Object.assign({}, initialData || {});
     this.#createBuffer();
     const self = this;
     this.data = new Proxy<Record<string, number|Iterable<number>>>(
-      this._data, {
+      this.#internalData, {
         set(target: Record<string, any>, key: string, value: any) {
           const result = Reflect.set(target, key, value);
           if (!self.typedArrays.hasOwnProperty(key)) {
@@ -32,7 +33,7 @@ export class UniformStruct {
   #createBuffer() {
     let pointer = 0;
     const offsets: Record<string, number> = {};
-    for (const [key, val] of Object.entries(this._data)) {
+    for (const [key, val] of Object.entries(this.#internalData)) {
       const count = (val instanceof Array) ? val.length : 1;
       offsets[key] = pointer;
       const itemSize = 4;
@@ -40,7 +41,7 @@ export class UniformStruct {
     }
     this.buffer = new ArrayBuffer(pointer);
     this.typedArrays = {};
-    for (const [key, val] of (Object.entries(this._data))) {
+    for (const [key, val] of (Object.entries(this.#internalData))) {
       const offset = offsets[key];
       const count = (val instanceof Array) ? val.length : 1;
       const typedArray = key.startsWith('int') ?
@@ -50,6 +51,4 @@ export class UniformStruct {
       this.typedArrays[key] = typedArray;
     }
   }
-
-  private _data: Record<string, number|Iterable<number>> = {};
 }
