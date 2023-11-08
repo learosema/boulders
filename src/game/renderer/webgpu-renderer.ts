@@ -194,7 +194,7 @@ export class WebGPURenderer implements IRenderer {
     if (! device) {
       return;
     }
-    this.pixelRatio = pixelRatio();
+    this.pixelRatio = 1;
 
     Object.assign(this.dimensions, {
       width: clamp(this.canvas.clientWidth * this.pixelRatio, 1,
@@ -206,7 +206,7 @@ export class WebGPURenderer implements IRenderer {
     const viewportMin = Math.min(this.canvas.clientWidth, this.canvas.clientHeight);
 
     // display at least 10x10 tiles on screen.
-    this.tileSize = Math.min(64, Math.round(viewportMin / 10));
+    this.tileSize = Math.min(64, Math.round(viewportMin / 10)) * this.pixelRatio;
 
     Object.assign(this.canvas, this.dimensions);
   }
