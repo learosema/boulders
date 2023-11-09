@@ -15,7 +15,7 @@ export function h(tagName: string, attribs: Record<string, string>, ...children:
 }
 
 export function renderTree(node: Element, tree: DOMTree) {
-  const namespace = tree.tagName === 'svg' ? 'http://www.w3.org/2000/svg' : node.namespaceURI;
+  const namespace = tree.tagName === 'svg' ? svgNS : node.namespaceURI;
   let el: Element|DocumentFragment;
   if (tree.tagName === fragment) {
     el = new DocumentFragment();
