@@ -26,3 +26,7 @@ select {
   font-family: inherit;
   font-size: inherit;
 }
+
+ul[class] {
+  list-style: none;
+}

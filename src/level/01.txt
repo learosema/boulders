@@ -1,7 +1,6 @@
 ---
 title: First Level
 author: Lea Rosema
-layout: game
 tags:
   - tutorial
 ---

@@ -5,7 +5,10 @@
 @import 'components/_boulders-game.css';
 @import 'components/_game-menu.css';
 @import 'components/_burger.css';
+@import 'components/_card.css';
 
-
+@import 'utils/_block-link.css';
 @import 'utils/_v-hidden.css';
 @import 'utils/_flow.css';
+@import 'utils/_grid.css';
+@import 'utils/_wrapper.css';

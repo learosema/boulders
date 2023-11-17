@@ -1,5 +1,5 @@
 import { IRenderer } from "../interfaces/irenderer";
-import { Field, Level, Position } from "../utils/level";
+import { Dimension, Field, Level, Position } from "../utils/level";
 import { oddly } from "../utils/num-utils";
 import { pixelRatio } from "../utils/pixel-ratio";
 
@@ -8,9 +8,7 @@ export class CanvasRenderer implements IRenderer {
   /**
    * tiles on the spritesheet are 16x16 pixels
    */
-  get spriteSize() {
-    return this.sprites.height;
-  };
+  spriteSize = 16;
 
   context: CanvasRenderingContext2D|null = null;
 
@@ -62,7 +60,7 @@ export class CanvasRenderer implements IRenderer {
    * @param levelPosition position of the first top left tile (default 0,0)
    * @param offset pixel offset to draw at. (default 0,0)
    */
-  frame(levelPosition?: Position, offset?: Position): void {
+  frame(levelPosition?: Position, offset?: Position, numTiles?: Dimension): void {
     const { level } = this;
     if (! this.context) {
       throw new Error('context not initialized.');
@@ -75,8 +73,12 @@ export class CanvasRenderer implements IRenderer {
     const { width, height } = this.dimensions;
     const { tileSize, pixelRatio, spriteSize } = this;
 
-    const numTilesX = oddly(1 + Math.round(width / (tileSize * pixelRatio)));
-    const numTilesY = oddly(1 + Math.round(height / (tileSize * pixelRatio)));
+    if (! numTiles) {
+      numTiles = {
+        width: oddly(1 + Math.round(width / (tileSize * pixelRatio))),
+        height: oddly(1 + Math.round(height / (tileSize * pixelRatio))),
+      }
+    }
 
     if (! offset) {
       offset = {
@@ -88,13 +90,13 @@ export class CanvasRenderer implements IRenderer {
     const { playerPosition } = level;
     if (! levelPosition) {
       levelPosition = {
-        x: (playerPosition?.x || 0) - Math.floor(numTilesX/2),
-        y: (playerPosition?.y || 0) - Math.floor(numTilesY/2),
+        x: (playerPosition?.x || 0) - Math.floor(numTiles.width / 2),
+        y: (playerPosition?.y || 0) - Math.floor(numTiles.height / 2),
       }
     }
 
-    for (let y = 0; y < numTilesY; y++) {
-      for (let x = 0; x < numTilesX; x++) {
+    for (let y = 0; y < numTiles.height; y++) {
+      for (let x = 0; x < numTiles.width; x++) {
         const field = level.getField(levelPosition.x + x, levelPosition.y + y);
         const dx = offset.x * pixelRatio + x * tileSize * pixelRatio;
         const dy = offset.y * pixelRatio + y * tileSize * pixelRatio;

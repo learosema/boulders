@@ -38,7 +38,7 @@ export class BouldersGame extends HTMLElement {
   get engine(): SupportedEngines {
     const engine = this.getAttribute('engine');
     if (! engine) {
-      return 'canvas2d';
+      return 'webgl';
     }
     if (engine !== 'webgpu' && engine !== 'canvas2d' && engine !== 'webgl' && engine !== 'noop') {
       throw new Error('Unsupported Engine');

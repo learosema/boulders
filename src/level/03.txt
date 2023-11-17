@@ -1,9 +1,6 @@
 ---
 title: Third Level
 author: Lea Rosema
-layout: game
-tags:
-  - tutorial
 ---
 ############
 #P.o...o...#

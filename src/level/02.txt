@@ -1,9 +1,6 @@
 ---
 title: Second Level
 author: Lea Rosema
-layout: game
-tags:
-  - tutorial
 ---
 ######################
 #........#o....$$$$$$#

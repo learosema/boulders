@@ -35,7 +35,7 @@ export class GameMenu extends HTMLElement {
             <label for="selectRenderer">Renderer</label>
             <select class="select" id="selectRenderer">
               <option value="canvas2d">Canvas2D</option>
-              <option value="webgl">WebGL</option>
+              <option value="webgl" selected>WebGL</option>
               <option value="webgpu">WebGPU</option>
             </select>
           </div>

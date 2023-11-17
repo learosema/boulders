@@ -1,0 +1,16 @@
+.card {
+  padding: .5rem;
+  border: 1px solid var(--fg, #fff);
+  border-radius: .5rem;
+
+  > h2 {
+    text-align: center;
+  }
+
+  > img {
+    margin-top: 2rem;
+    aspect-ratio: var(--img-ratio, 16/9);
+    object-fit: contain;
+    width: 100%;
+  }
+}
