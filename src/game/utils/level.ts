@@ -162,7 +162,7 @@ export class Level {
       this.playerDirection = Direction.LEFT;
     }
 
-    const field = this.getField(newPos.x, newPos.y);
+    let field = this.getField(newPos.x, newPos.y);
 
     if (field === Field.STONE && yr === 0) {
       const nextField = this.getField(newPos.x + xr, newPos.y);
@@ -172,6 +172,12 @@ export class Level {
         playerPosition.x = newPos.x;
         playerPosition.y = newPos.y;
         this.notify('push');
+      }
+    }
+
+    if (field === Field.EXIT) {
+      if (this.collectedGems >= this.numGems) {
+        this.notify('won');
       }
     }
 

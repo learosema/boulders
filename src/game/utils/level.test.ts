@@ -163,6 +163,33 @@ describe('Level class', () => {
     expect(spy).toHaveBeenCalledWith('gem', undefined);
   });
 
+  it('should notify subscribers about the game was won when the player moves to the exit and no gems are left', () => {
+    const level = Level.parse(`
+      #####
+      #PX #
+      #####
+    `);
+    const spy = jest.fn();
+    level.subscribe(spy);
+
+    level.move(1, 0);
+    expect(spy).toHaveBeenCalledWith('won', undefined);
+  });
+
+  it('should not notify subscribers about the game was won when the player moves to the exit but gems are left', () => {
+    const level = Level.parse(`
+      #####
+      #PX$#
+      #####
+    `);
+    const spy = jest.fn();
+    level.subscribe(spy);
+
+    level.move(1, 0);
+    expect(spy).not.toHaveBeenCalledWith('won', undefined);
+  });
+
+
   it('should throw an Error when trying to move but the player is not alive', () => {
     const level = Level.parse(`
       ####

@@ -4,6 +4,7 @@ import { SupportedEngines, rendererFactory } from "../renderer/engines";
 import { AnimationLoop } from "../utils/animation-interval";
 import { Level, LevelCallbackFunction } from "../utils/level";
 import { loadImage } from "../utils/load-image";
+import { WonMenu } from "./won-menu";
 
 export class BouldersGame extends HTMLElement {
 
@@ -141,6 +142,12 @@ export class BouldersGame extends HTMLElement {
   }
 
   onGameEvent: LevelCallbackFunction = (eventName: string) => {
+    if (eventName === 'won') {
+      const wonMenu = document.querySelector<WonMenu>('won-menu');
+      if (wonMenu) {
+        wonMenu.open = true;
+      }
+    }
     if (eventName === 'gem') {
       this.soundMachine.bling();
     }

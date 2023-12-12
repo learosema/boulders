@@ -8,6 +8,8 @@
   </script>
 </boulders-game>
 {% include "game-menu.njk" %}
+{% set nextLevel = collections.level | getNextCollectionItem %}
+<won-menu{% if nextLevel %} data-url-next-level="{{ nextLevel.url }}"{% endif%}></won-menu>
 {% endblock %}
 
 {% block scripts %}
