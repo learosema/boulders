@@ -15,9 +15,9 @@ export class WonMenu extends HTMLElement {
   attributeChangedCallback(name: string) {
     if (name === 'open') {
       if (this.open) {
-        this.openMenu();
+        this.#openMenu();
       } else {
-        this.closeMenu();
+        this.#closeMenu();
       }
     }
   }
@@ -57,11 +57,11 @@ export class WonMenu extends HTMLElement {
     this.innerHTML = '';
   }
 
-  openMenu() {
+  #openMenu() {
     this.wonMenu?.showModal(); 
   }
 
-  closeMenu() {
+  #closeMenu() {
     this.wonMenu?.close();
     setTimeout(() => document.querySelector('canvas')?.focus(), 0);
   }
