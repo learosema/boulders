@@ -16,6 +16,7 @@ It is a demo/research project for a couple of web platform technologies, framewo
 - GLSL and WGSL shaders
 - Building game mechanics incrementally via test-driven development
 - some basic Software Architecture principles, some SOLID but mostly "loose coupling" and depending on interfaces rather than implementations
+- "isomorphic TypeScript": The Canvas2D renderer used in the Frontend is re-used in Eleventy/node.js to generate preview images.
 
 ## Talk 
 
