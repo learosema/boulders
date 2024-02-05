@@ -8,6 +8,8 @@ It is a demo/research project for a couple of web platform technologies, framewo
 - [Eleventy](https://11ty.dev)
 - [TypeScript](https://typescriptlang.org)
 - [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components)
+- [esbuild](https://esbuild.github.io/)
+- [lightningcss](https://lightningcss.dev/)
 - Web Audio API. A microlibrary dropped out of this: [https://retro-sound.js.org](https://retro-sound.js.org)
 - JSX without React: I've written a bit about that [Custom JSX in TypeScript](https://lea.codes/posts/2024-01-17-custom-jsx-in-typescript/)
 - Different Rendering Engines and changing them on-the-fly while in-game: WebGL, WebGPU, Canvas2D
