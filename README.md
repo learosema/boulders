@@ -1,6 +1,6 @@
 # Boulders - A Boulder Dash Clone
 
-This is a basic clone of the Boulder Dash clone, originally built by [Peter Liepa](https://brainjam.ca). The game mechanics are roughly implemented from what I've had in memory.
+This is a basic clone of the Boulder Dash game, originally built by [Peter Liepa](https://brainjam.ca). The game mechanics are roughly implemented from what I've had in memory.
 It is a demo/research project for a couple of web platform technologies, frameworks and methodologies I'm interested in and love to work with.
 
 ## Technologies
