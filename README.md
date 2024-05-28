@@ -25,6 +25,14 @@ I held a talk about the project at the [NovaSummit 2023](https://youtu.be/rsf0hT
 
 There are also [slides](https://boulders-slides.netlify.app/). The Slides are also made with Eleventy. The source is available on [GitHub](https://github.com/learosema/boulders-slides).
 
+## Development environment setup
+
+This project relies on the [canvas](https://npmjs.org/package/) npm package 
+to render preview images for the levels via Eleventy.
+
+It requires a bunch of dependencies to be installed on the system. 
+Please follow the instructions on the npm page.
+
 ## License
 
 - Code: [LICENSE](LICENSE.md)
