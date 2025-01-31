@@ -182,7 +182,7 @@ export class BouldersGame extends HTMLElement {
     if (e.code === 'ArrowRight' || e.code === 'KeyD') {
       this.inputQueue.push('right');
     }
-
+    e.preventDefault()
   };
 
   onPointerDown = (e: PointerEvent) => {
